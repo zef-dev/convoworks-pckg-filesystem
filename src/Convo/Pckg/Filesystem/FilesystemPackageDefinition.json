@@ -1,0 +1,10 @@
+{
+    "namespace": "convo-filesystem",
+    "author": "ZEF Development",
+    "email": "mark@zefdev.com",
+    "source_for": [
+        "intents",
+        "templates"
+    ],
+    "description": "Interact with the filesystem by reading files, loading JSON, or playing music."
+}
