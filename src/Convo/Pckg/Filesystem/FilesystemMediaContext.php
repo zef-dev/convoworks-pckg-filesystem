@@ -79,32 +79,20 @@ class FilesystemMediaContext extends AbstractBasicComponent implements IMediaSou
         $hasSearchedPlaylist = false;
         $searchTextSimilarityPercentage = 75;
 
-        if (isset($this->_getServiceParams()->getServiceParam('search_query')['Playlist'])) {
-            $previouslySearchedPlaylist = $this->_getServiceParams()->getServiceParam('search_query')['Playlist'];
-
-            if (!empty($previouslySearchedPlaylist)) {
-                $targetPlaylist = $this->_getTargetPlaylist($previouslySearchedPlaylist);
-                $this->_logger->debug("Found [" . $targetPlaylist . "] with [" . $previouslySearchedPlaylist . "]");
-            }
-        }
-
         if (isset($this->_searchQuery['Playlist'])) {
             $hasSearchedPlaylist = true;
             if (str_contains(strtolower($this->_searchQuery['Playlist']), 'all')) {
-                $this->_getServiceParams()->setServiceParam('search_query', []);
                 $targetPlaylist = null;
             } else if (str_contains(strtolower($this->_searchQuery['Playlist']), 'main')) {
                 if (count($availableSongList) > 0) {
                     $songDirectoryName = $this->_prepareSong($availableSongList[0])->getDirectoryName();
                     $targetPlaylist = $songDirectoryName;
-                    $this->_getServiceParams()->setServiceParam('search_query', ["Playlist" => $songDirectoryName]);
                 }
             } else {
                 $targetPlaylist = $this->_getTargetPlaylist($this->_searchQuery['Playlist']);
                 if (self::NOT_FOUND === strtolower($targetPlaylist)) {
                     throw new DataItemNotFoundException("The specified playlist '" . $this->_searchQuery['Playlist'] . "' cant be found.");
                 }
-                $this->_getServiceParams()->setServiceParam('search_query', $this->_searchQuery);
             }
         }
 
@@ -175,7 +163,6 @@ class FilesystemMediaContext extends AbstractBasicComponent implements IMediaSou
         }
 
         if ($hasSearchedPlaylist && empty($filteredSongsList)) {
-            $this->_getServiceParams()->setServiceParam('search_query', []);
             throw new \Exception("The specified playlist '" . $this->_searchQuery['Playlist'] . "' is empty.");
         }
 
