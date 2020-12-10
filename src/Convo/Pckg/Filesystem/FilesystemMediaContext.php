@@ -132,6 +132,13 @@ class FilesystemMediaContext extends AbstractBasicComponent implements IMediaSou
                     if ($percentAvg < $searchTextSimilarityPercentage) {
                         continue;
                     }
+                } else if (!isset($this->_searchQuery['Artist']) && isset($this->_searchQuery['Song'])) {
+                    $percent = 100;
+                    similar_text(strtolower($songData->getSongTitle()), strtolower($this->_searchQuery['Song']), $percent);
+
+                    if ($percent < $searchTextSimilarityPercentage) {
+                        continue;
+                    }
                 }
             } else {
                 if (isset($this->_searchQuery['Artist']) && !isset($this->_searchQuery['Song'])) {
@@ -155,6 +162,15 @@ class FilesystemMediaContext extends AbstractBasicComponent implements IMediaSou
                     $percentAvg = ($percentArtist + $percentSongTitle) / 2;
 
                     if ($percentAvg < $searchTextSimilarityPercentage) {
+                        continue;
+                    }
+                } else if (!isset($this->_searchQuery['Artist']) && isset($this->_searchQuery['Song'])) {
+                    $this->_logger->debug("Search by file name for song only");
+                    $songFromFileName = explode("-", $songData->getFileName())[1];
+                    $percent = 100;
+                    similar_text(strtolower(trim($songFromFileName)), strtolower($this->_searchQuery['Song']), $percent);
+
+                    if ($percent < $searchTextSimilarityPercentage) {
                         continue;
                     }
                 }
