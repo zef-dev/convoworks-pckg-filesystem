@@ -1,368 +1,403 @@
 {
-    "template_id" : "custom-music-player",
-    "name" : "Custom Music Player",
-    "description" : "Template for custom music player",
-      "service" : {
-        "convo_service_version": 27,
-        "properties": [],
-        "packages": [
-          "convo-core",
-		  "convo-filesystem"
+    "template_id":"custom-music-player",
+    "name":"Custom Music Player",
+    "description":"Template for custom music player",
+    "service":{
+        "convo_service_version":29,
+        "properties":[
+            
         ],
-        "configurations": [],
-        "contexts": [
-	        {
-				"class": "\\Convo\\Pckg\\Filesystem\\FilesystemMediaContext",
-				"namespace": "convo-filesystem",
-				"properties": {
-					"id": "filesystemMediaContext",
-					"mp3SourcePath": "${mp3_folder_path}",
-					"mp3SourceBasePath": "${public_url}",
-					"_component_id": "badf3a3b-e9b3-ae39-242c-cc0ad6ed06e0"
-            }
-        }
+        "packages":[
+            "convo-core",
+            "convo-filesystem"
         ],
-        "variables": {
-			"mp3_folder_path": "\/var\/www\/ConvoWorks\/stage\/www\/mp3\/",
-			"public_url": "https:\/\/proto-stage.convoworks.com\/mp3\/"
-    },
-        "fragments": [],
-        "entities": [],
-        "intents": [],
-        "blocks": [
-        {
-            "class": "\\Convo\\Pckg\\Core\\Elements\\ConversationBlock",
-            "namespace": "convo-core",
-            "properties": {
-                "block_id": "__sessionStart",
-                "elements": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "comment": "Go to Media Player Block",
-                            "_component_id": "708ad2e2-3788-421c-98bf-21679d244bc0"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\GoToElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "value": "__mediaControls",
-                            "next": false,
-                            "_component_id": "02768fa4-10b5-1057-5e19-894333c3168e"
-                        }
-                    }
-                ],
-                "processors": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Processors\\SimpleProcessor",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "name": null,
-                            "ok": [
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Elements\\GoToElement",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "value": "__mediaControls",
-                                        "next": false,
-                                        "_component_id": "tamqwfe9-q8m5-9cy9-crq5-wjuoanixxl9h"
-                                    }
-                                }
-                            ],
-                            "request_filters": [
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Filters\\IntentRequestFilter",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "readers": [
-                                            {
-                                                "class": "\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
-                                                "namespace": "convo-core",
-                                                "properties": {
-                                                    "intent": "convo-core.PlaySong",
-                                                    "required_slots": "",
-                                                    "values": [],
-                                                    "rename": [],
-                                                    "_component_id": "xuih6pkl-dxhc-qtvj-x3w6-uy0fkpargsjw"
-                                                }
-                                            },
-                                            {
-                                                "class": "\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
-                                                "namespace": "convo-core",
-                                                "properties": {
-                                                    "intent": "convo-core.ContinuePlayback",
-                                                    "required_slots": "",
-                                                    "values": [],
-                                                    "rename": [],
-                                                    "_component_id": "d4tz2p3z-ilpt-ath7-wpsm-fizj2us63dey"
-                                                }
-                                            }
-                                        ],
-                                        "_component_id": "9n3ah1iz-hapv-99vx-7l4s-6sj26ok7trbs"
-                                    }
-                                }
-                            ],
-                            "_component_id": "kpbcsooa-4qwo-jtmd-rfcl-ajz2vssjhlyu"
-                        }
-                    }
-                ],
-                "fallback": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "comment": "Read the message if we have problem with starting the service",
-                            "_component_id": "9107b12a-0738-33a5-c9b2-57781c09b961"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "type": "default",
-                            "alexa_domain": "normal",
-                            "alexa_emotion": "neutral",
-                            "alexa_emotion_intensity": "medium",
-                            "text": "Music player is not responding, please try again later...",
-                            "append": false,
-                            "_component_id": "a8f70bff-fa8a-0fc2-79ac-cf660a21f4f4"
-                        }
-                    }
-                ],
-                "_component_id": "26385f66-e906-a37b-4913-8a7098a1b507",
-                "role": "session_start",
-                "name": "Session start"
+        "configurations":[
+            
+        ],
+        "contexts":[
+            {
+                "class":"\\Convo\\Pckg\\Filesystem\\FilesystemMediaContext",
+                "namespace":"convo-filesystem",
+                "properties":{
+                    "id":"filesystemMediaContext",
+                    "mp3SourcePath":"${mp3_folder_path}",
+                    "mp3SourceBasePath":"${public_url}",
+                    "_component_id":"badf3a3b-e9b3-ae39-242c-cc0ad6ed06e0"
+                }
             }
+        ],
+        "variables":{
+            "mp3_folder_path":"\/var\/www\/ConvoWorks\/stage\/www\/mp3\/",
+            "public_url":"https:\/\/proto-stage.convoworks.com\/mp3\/"
         },
-        {
-            "class": "\\Convo\\Pckg\\Core\\Elements\\MediaBlock",
-            "namespace": "convo-core",
-            "properties": {
-                "block_id": "__mediaControls",
-                "elements": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "comment": "Enter the name for block SYSTEM-__MEDIACONTROLS",
-                            "_component_id": "a33e0565-0d2c-4231-9e7d-c69a3929ed25"
+        "fragments":[
+            
+        ],
+        "entities":[
+            
+        ],
+        "intents":[
+            
+        ],
+        "blocks":[
+            {
+                "class":"\\Convo\\Pckg\\Core\\Elements\\ConversationBlock",
+                "namespace":"convo-core",
+                "properties":{
+                    "block_id":"__sessionStart",
+                    "elements":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "comment":"Go to Media Player Block",
+                                "_component_id":"708ad2e2-3788-421c-98bf-21679d244bc0"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\GoToElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "value":"__mediaControls",
+                                "next":false,
+                                "_component_id":"02768fa4-10b5-1057-5e19-894333c3168e"
+                            }
                         }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "comment": "Welcome message",
-                            "_component_id": "d617c1d7-46c2-6abd-42d1-75d5ea009456"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "type": "default",
-                            "alexa_domain": "normal",
-                            "alexa_emotion": "neutral",
-                            "alexa_emotion_intensity": "medium",
-                            "text": "Welcome to ZEF Custom Music Player.",
-                            "append": false,
-                            "_component_id": "1d016016-f1bc-906a-3cf8-558dad5a541b"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\RunOnceElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "scope_type": "installation",
-                            "child": [
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "comment": "Read the message only once per installation",
-                                        "_component_id": "8077ea85-1a8c-92b7-9214-d70dd258a62d"
+                    ],
+                    "processors":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Processors\\SimpleProcessor",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "name":null,
+                                "ok":[
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Elements\\GoToElement",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "value":"__mediaControls",
+                                            "next":false,
+                                            "_component_id":"tamqwfe9-q8m5-9cy9-crq5-wjuoanixxl9h"
+                                        }
                                     }
-                                },
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "type": "default",
-                                        "alexa_domain": "normal",
-                                        "alexa_emotion": "neutral",
-                                        "alexa_emotion_intensity": "medium",
-                                        "text": "To start playing media, just say \"Play Song by Artist\", \"Play songs from Genre\", \"Play a Song by Artist\", \"Play a Song\" or \"Start Playback\".",
-                                        "append": false,
-                                        "_component_id": "b8097fef-f9e5-5643-bf95-c26041ddbb18"
-                                    }
-                                }
-                            ],
-                            "else": [
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "type": "default",
-                                        "alexa_domain": "normal",
-                                        "alexa_emotion": "neutral",
-                                        "alexa_emotion_intensity": "medium",
-                                        "text": "To start playback just say \"Play a Song\".",
-                                        "append": false,
-                                        "_component_id": "44f6b844-4ab3-c43c-74a9-1ef36d1912fc"
-                                    }
-                                }
-                            ],
-                            "_component_id": "79ac6784-df23-ccd9-1a60-f69208cac094"
-                        }
-                    }
-                ],
-                "not_found": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "comment": "Read the messages if the specified song does not exist",
-                            "_component_id": "314d39c3-82fc-3c0f-35e9-5cc0b0f760b4"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "type": "default",
-                            "alexa_domain": "normal",
-                            "alexa_emotion": "neutral",
-                            "alexa_emotion_intensity": "medium",
-                            "text": "The specified song does not exist.",
-                            "append": false,
-                            "_component_id": "8285c597-a1b5-5911-c5e4-60d8db0d2b99"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "type": "default",
-                            "alexa_domain": "normal",
-                            "alexa_emotion": "neutral",
-                            "alexa_emotion_intensity": "medium",
-                            "text": "Please try another song.",
-                            "append": false,
-                            "_component_id": "0a6ac74a-7edb-d8a7-d0fb-342720dc5ca5"
-                        }
-                    }
-                ],
-                "additional_processors": [],
-                "fallback": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "comment": "Read the messages if we have problems with starting some mp3 file",
-                            "_component_id": "b51b0ce2-f21a-81fc-3b00-27a7b3716077"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "type": "default",
-                            "alexa_domain": "normal",
-                            "alexa_emotion": "neutral",
-                            "alexa_emotion_intensity": "medium",
-                            "text": "Please try again.",
-                            "append": false,
-                            "_component_id": "65f58536-2aa7-8661-a4ab-8b296d8b07e1"
-                        }
-                    },
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "type": "default",
-                            "alexa_domain": "normal",
-                            "alexa_emotion": "neutral",
-                            "alexa_emotion_intensity": "medium",
-                            "text": "You can say \"Play a Song by Artist\" or you can say \"Help\" fore more instructions.",
-                            "append": false,
-                            "_component_id": "c041a30f-f9e5-dc1f-fac0-6b815fe74c6d"
-                        }
-                    }
-                ],
-                "context_id": "filesystemMediaContext",
-                "_component_id": "5c801df7-7cb2-ca7b-bc77-86e1bffcfe80",
-                "role": "media_player",
-                "name": "Media player"
-            }
-        },
-        {
-            "class": "\\Convo\\Pckg\\Core\\Elements\\ConversationBlock",
-            "namespace": "convo-core",
-            "properties": {
-                "block_id": "__serviceProcessors",
-                "elements": [],
-                "processors": [
-                    {
-                        "class": "\\Convo\\Pckg\\Core\\Processors\\SimpleProcessor",
-                        "namespace": "convo-core",
-                        "properties": {
-                            "ok": [
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "comment": "Read the message after we catch help intent",
-                                        "_component_id": "d3d95db6-71b7-2da5-c925-719d0f9aaf57"
-                                    }
-                                },
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "type": "default",
-                                        "alexa_domain": "normal",
-                                        "alexa_emotion": "neutral",
-                                        "alexa_emotion_intensity": "medium",
-                                        "text": "You can say \"Play Song by Artist\", \"Play songs from Genre\", \"Play a Song by Artist\", \"Play a Song\", \"Start Playback\".",
-                                        "append": false,
-                                        "_component_id": "b87cfd3e-e05f-900e-8f47-0384e44848af"
-                                    }
-                                }
-                            ],
-                            "request_filters": [
-                                {
-                                    "class": "\\Convo\\Pckg\\Core\\Filters\\IntentRequestFilter",
-                                    "namespace": "convo-core",
-                                    "properties": {
-                                        "readers": [
-                                            {
-                                                "class": "\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
-                                                "namespace": "convo-core",
-                                                "properties": {
-                                                    "intent": "convo-core.HelpIntent",
-                                                    "values": [],
-                                                    "rename": [],
-                                                    "_component_id": "461c2848-c43a-6ddc-5d38-215763d20124"
+                                ],
+                                "request_filters":[
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Filters\\IntentRequestFilter",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "readers":[
+                                                {
+                                                    "class":"\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
+                                                    "namespace":"convo-core",
+                                                    "properties":{
+                                                        "intent":"convo-core.PlaySong",
+                                                        "required_slots":"",
+                                                        "values":[
+                                                            
+                                                        ],
+                                                        "rename":[
+                                                            
+                                                        ],
+                                                        "_component_id":"xuih6pkl-dxhc-qtvj-x3w6-uy0fkpargsjw"
+                                                    }
+                                                },
+                                                {
+                                                    "class":"\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
+                                                    "namespace":"convo-core",
+                                                    "properties":{
+                                                        "intent":"convo-core.ContinuePlayback",
+                                                        "required_slots":"",
+                                                        "values":[
+                                                            
+                                                        ],
+                                                        "rename":[
+                                                            
+                                                        ],
+                                                        "_component_id":"d4tz2p3z-ilpt-ath7-wpsm-fizj2us63dey"
+                                                    }
+                                                },
+                                                {
+                                                    "class":"\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
+                                                    "namespace":"convo-core",
+                                                    "properties":{
+                                                        "intent":"convo-core.HelpIntent",
+                                                        "required_slots":"",
+                                                        "values":[
+                                                            
+                                                        ],
+                                                        "rename":[
+                                                            
+                                                        ],
+                                                        "_component_id":"hdkbhmtp-ljn3-vrrd-avyc-f4l064x9rfpi"
+                                                    }
                                                 }
-                                            }
-                                        ],
-                                        "_component_id": "a698d5dc-fe2c-df61-001f-810436829547"
+                                            ],
+                                            "_component_id":"9n3ah1iz-hapv-99vx-7l4s-6sj26ok7trbs"
+                                        }
                                     }
-                                }
-                            ],
-                            "_component_id": "57af19eb-ef86-7313-376f-36ba9870c2db",
-                            "name": "Help"
+                                ],
+                                "_component_id":"kpbcsooa-4qwo-jtmd-rfcl-ajz2vssjhlyu"
+                            }
                         }
-                    }
-                ],
-                "fallback": [],
-                "_component_id": "d6a30948-5af4-6138-1fa9-02764f855fab",
-                "role": "service_processors",
-                "name": "Service processors"
+                    ],
+                    "fallback":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "comment":"Read the message if we have problem starting the service",
+                                "_component_id":"9107b12a-0738-33a5-c9b2-57781c09b961"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "type":"default",
+                                "alexa_domain":"normal",
+                                "alexa_emotion":"neutral",
+                                "alexa_emotion_intensity":"medium",
+                                "text":"Music player is not responding, please try again later...",
+                                "append":false,
+                                "_component_id":"a8f70bff-fa8a-0fc2-79ac-cf660a21f4f4"
+                            }
+                        }
+                    ],
+                    "_component_id":"26385f66-e906-a37b-4913-8a7098a1b507",
+                    "role":"session_start",
+                    "name":"Session start"
+                }
+            },
+            {
+                "class":"\\Convo\\Pckg\\Core\\Elements\\MediaBlock",
+                "namespace":"convo-core",
+                "properties":{
+                    "block_id":"__mediaControls",
+                    "elements":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "comment":"Welcome message",
+                                "_component_id":"d617c1d7-46c2-6abd-42d1-75d5ea009456"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "type":"default",
+                                "alexa_domain":"normal",
+                                "alexa_emotion":"neutral",
+                                "alexa_emotion_intensity":"medium",
+                                "text":"Welcome to ZEF Custom Music Player.",
+                                "append":false,
+                                "_component_id":"1d016016-f1bc-906a-3cf8-558dad5a541b"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\RunOnceElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "scope_type":"installation",
+                                "child":[
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "comment":"Read the message only once per installation",
+                                            "_component_id":"8077ea85-1a8c-92b7-9214-d70dd258a62d"
+                                        }
+                                    },
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "type":"default",
+                                            "alexa_domain":"normal",
+                                            "alexa_emotion":"neutral",
+                                            "alexa_emotion_intensity":"medium",
+                                            "text":"To start playing media, just say \"Play Song by Artist\", \"Play songs from Genre\", \"Play a Song by Artist\", \"Play a Song\" or \"Start Playback\".",
+                                            "append":false,
+                                            "_component_id":"b8097fef-f9e5-5643-bf95-c26041ddbb18"
+                                        }
+                                    }
+                                ],
+                                "else":[
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "type":"default",
+                                            "alexa_domain":"normal",
+                                            "alexa_emotion":"neutral",
+                                            "alexa_emotion_intensity":"medium",
+                                            "text":"To start playback just say \"Play a Song\".",
+                                            "append":false,
+                                            "_component_id":"44f6b844-4ab3-c43c-74a9-1ef36d1912fc"
+                                        }
+                                    }
+                                ],
+                                "_component_id":"79ac6784-df23-ccd9-1a60-f69208cac094"
+                            }
+                        }
+                    ],
+                    "not_found":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "comment":"Read the messages if the specified song does not exist",
+                                "_component_id":"314d39c3-82fc-3c0f-35e9-5cc0b0f760b4"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "type":"default",
+                                "alexa_domain":"normal",
+                                "alexa_emotion":"neutral",
+                                "alexa_emotion_intensity":"medium",
+                                "text":"The specified song does not exist.",
+                                "append":false,
+                                "_component_id":"8285c597-a1b5-5911-c5e4-60d8db0d2b99"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "type":"default",
+                                "alexa_domain":"normal",
+                                "alexa_emotion":"neutral",
+                                "alexa_emotion_intensity":"medium",
+                                "text":"Please try another song.",
+                                "append":false,
+                                "_component_id":"0a6ac74a-7edb-d8a7-d0fb-342720dc5ca5"
+                            }
+                        }
+                    ],
+                    "additional_processors":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Processors\\SimpleProcessor",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "ok":[
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "comment":"Read the message after we catch help intent",
+                                            "_component_id":"d3d95db6-71b7-2da5-c925-719d0f9aaf57"
+                                        }
+                                    },
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "type":"default",
+                                            "alexa_domain":"normal",
+                                            "alexa_emotion":"neutral",
+                                            "alexa_emotion_intensity":"medium",
+                                            "text":"You can say \"Play Song by Artist\", \"Play songs from Genre\", \"Play a Song by Artist\", \"Play a Song\", \"Start Playback\".",
+                                            "append":false,
+                                            "_component_id":"b87cfd3e-e05f-900e-8f47-0384e44848af"
+                                        }
+                                    }
+                                ],
+                                "request_filters":[
+                                    {
+                                        "class":"\\Convo\\Pckg\\Core\\Filters\\IntentRequestFilter",
+                                        "namespace":"convo-core",
+                                        "properties":{
+                                            "readers":[
+                                                {
+                                                    "class":"\\Convo\\Pckg\\Core\\Filters\\ConvoIntentReader",
+                                                    "namespace":"convo-core",
+                                                    "properties":{
+                                                        "intent":"convo-core.HelpIntent",
+                                                        "values":[
+                                                            
+                                                        ],
+                                                        "rename":[
+                                                            
+                                                        ],
+                                                        "_component_id":"461c2848-c43a-6ddc-5d38-215763d20124"
+                                                    }
+                                                }
+                                            ],
+                                            "_component_id":"a698d5dc-fe2c-df61-001f-810436829547"
+                                        }
+                                    }
+                                ],
+                                "_component_id":"57af19eb-ef86-7313-376f-36ba9870c2db",
+                                "name":"Help"
+                            }
+                        }
+                    ],
+                    "fallback":[
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\CommentElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "comment":"Read the messages if we have problem starting mp3 file",
+                                "_component_id":"b51b0ce2-f21a-81fc-3b00-27a7b3716077"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "type":"default",
+                                "alexa_domain":"normal",
+                                "alexa_emotion":"neutral",
+                                "alexa_emotion_intensity":"medium",
+                                "text":"Please try again.",
+                                "append":false,
+                                "_component_id":"65f58536-2aa7-8661-a4ab-8b296d8b07e1"
+                            }
+                        },
+                        {
+                            "class":"\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
+                            "namespace":"convo-core",
+                            "properties":{
+                                "type":"default",
+                                "alexa_domain":"normal",
+                                "alexa_emotion":"neutral",
+                                "alexa_emotion_intensity":"medium",
+                                "text":"You can say \"Play a Song by Artist\" or you can say \"Help\" fore more instructions.",
+                                "append":false,
+                                "_component_id":"c041a30f-f9e5-dc1f-fac0-6b815fe74c6d"
+                            }
+                        }
+                    ],
+                    "context_id":"filesystemMediaContext",
+                    "_component_id":"5c801df7-7cb2-ca7b-bc77-86e1bffcfe80",
+                    "role":"media_player",
+                    "name":"Media player"
+                }
+            },
+            {
+                "class":"\\Convo\\Pckg\\Core\\Elements\\ConversationBlock",
+                "namespace":"convo-core",
+                "properties":{
+                    "block_id":"__serviceProcessors",
+                    "elements":[
+                        
+                    ],
+                    "processors":[
+                        
+                    ],
+                    "fallback":[
+                        
+                    ],
+                    "_component_id":"d6a30948-5af4-6138-1fa9-02764f855fab",
+                    "role":"service_processors",
+                    "name":"Service processors"
+                }
             }
-        }
-    ]
+        ]
     }
 }
