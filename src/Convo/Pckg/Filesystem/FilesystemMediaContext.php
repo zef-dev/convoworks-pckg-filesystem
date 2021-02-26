@@ -186,6 +186,9 @@ class FilesystemMediaContext extends AbstractBasicComponent implements IMediaSou
         return $filteredSongsList;
     }
 
+    /**
+     * @deprecated
+     */
     public function setSearchQuery($searchQuery)
     {
         $this->_logger->debug("Setting query...");
