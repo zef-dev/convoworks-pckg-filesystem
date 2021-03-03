@@ -10,456 +10,323 @@ use Convo\Core\Media\Mp3File;
 use Convo\Core\Workflow\AbstractBasicComponent;
 use Convo\Core\Workflow\IMediaSourceContext;
 use DirectoryIterator;
-use wapmorgan\Mp3Info\Mp3Info;
+use Convo\Core\Media\IAudioFile;
 
 class FilesystemMediaContext extends AbstractBasicComponent implements IMediaSourceContext
 {
-    const NOT_FOUND = 'not_found';
 
     private $_id;
 
-    /** @var string */
-    private $_baseFolderPath = "";
+    private $_folderPath;
+    private $_baseUrl;
+    
+    private $_search;
+    private $_searchFolderl;
 
-    /** @var string */
-    private $_baseUrl = "";
 
-    /** @var boolean */
-    private $_shouldMovePonter = true;
+    public function __construct( $properties)
+    {
+        parent::__construct( $properties);
+        
+        $this->_id              =   $properties['id'];
+        
+        $this->_folderPath      =   $properties['folder_path'];
+        $this->_baseUrl         =   $properties['base_url'];
+        
+        $this->_search          =   $properties['search'];
+        $this->_searchFolderl   =   $properties['search_folders'];
+    }
 
+    
     /**
-     * @var array
-     */
-    private $_searchQuery = [];
-
-    private $_availablePlaylistPaths = [];
-
-    /**
-     *
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $_logger;
-
-    public function __construct($properties)
-    {
-        parent::__construct($properties);
-        $this->_id			    =	$properties['id'];
-        $this->_baseFolderPath  =	$properties['mp3SourcePath'];
-        $this->_baseUrl		    =	$properties['mp3SourceBasePath'];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function list(): iterable
-    {
-        if ($this->_shouldMovePonter) {
-            $this->_setCurrentSongIndex(0);
-        }
-        $availableSongs = [];
-        foreach ($this->_availablePlaylistPaths as $availablePlaylist) {
-            $songsFolderPath = $availablePlaylist;
-            foreach ($this->_getDirectoryFiles($songsFolderPath) as $song) {
-                $songFile =  $songsFolderPath . DIRECTORY_SEPARATOR . $song;
-                array_push($availableSongs, $songFile);
-            }
-        }
-        $this->_getServiceParams()->setServiceParam('available_songs', $availableSongs);
-        return $availableSongs;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function find(): iterable
-    {
-        $availableSongList = $this->list();
-        $filteredSongsList = [];
-        $targetPlaylist = null;
-        $hasSearchedPlaylist = false;
-        $searchTextSimilarityPercentage = 75;
-
-        if (isset($this->_searchQuery['Playlist'])) {
-            $hasSearchedPlaylist = true;
-            if (str_contains(strtolower($this->_searchQuery['Playlist']), 'all')) {
-                $targetPlaylist = null;
-            } else if (str_contains(strtolower($this->_searchQuery['Playlist']), 'main')) {
-                if (count($availableSongList) > 0) {
-                    $songDirectoryName = $this->_prepareSong($availableSongList[0])->getDirectoryName();
-                    $targetPlaylist = $songDirectoryName;
-                }
-            } else {
-                $targetPlaylist = $this->_getTargetPlaylist($this->_searchQuery['Playlist']);
-                if (self::NOT_FOUND === strtolower($targetPlaylist)) {
-                    throw new DataItemNotFoundException("The specified playlist '" . $this->_searchQuery['Playlist'] . "' cant be found.");
-                }
-            }
-        }
-
-        foreach ($availableSongList as $songFile) {
-            $songData = $this->_prepareSong($songFile);
-            $this->_logger->info("Song data info [" . $songData->getDirectoryName() . "]");
-
-            if ($targetPlaylist !== null) {
-                $this->_logger->debug("Comparing [" . $targetPlaylist . "] and [" . $songData->getDirectoryName() . "]");
-                if ($targetPlaylist !== $songData->getDirectoryName()) {
-                    continue;
-                }
-            }
-
-            if ($songData->isMetaDataAvailable()) {
-                if (isset($this->_searchQuery['Artist']) && !isset($this->_searchQuery['Song'])) {
-                    $percent = 100;
-                    similar_text(strtolower($songData->getArtist()), strtolower($this->_searchQuery['Artist']), $percent);
-
-                    if ($percent < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                } else if (isset($this->_searchQuery['Genre'])) {
-                    $percent = 100;
-                    similar_text(strtolower($songData->getGenre()), strtolower($this->_searchQuery['Genre']), $percent);
-
-                    if ($percent < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                } else if (isset($this->_searchQuery['Artist']) && isset($this->_searchQuery['Song'])) {
-                    $percentArtist = 100;
-                    similar_text(strtolower($songData->getArtist()), strtolower($this->_searchQuery['Artist']), $percentArtist);
-                    $percentSongTitle = 100;
-                    similar_text(strtolower($songData->getSongTitle()), strtolower($this->_searchQuery['Song']), $percentSongTitle);
-                    $percentAvg = ($percentArtist + $percentSongTitle) / 2;
-
-                    if ($percentAvg < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                } else if (!isset($this->_searchQuery['Artist']) && isset($this->_searchQuery['Song'])) {
-                    $percent = 100;
-                    similar_text(strtolower($songData->getSongTitle()), strtolower($this->_searchQuery['Song']), $percent);
-
-                    if ($percent < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                }
-            } else {
-                if (isset($this->_searchQuery['Artist']) && !isset($this->_searchQuery['Song'])) {
-                    $this->_logger->debug("Search by file name for artist");
-                    $artistFromFileName = explode("-", $songData->getFileName())[0];
-                    $percent = 100;
-                    similar_text(strtolower(trim($artistFromFileName)), strtolower($this->_searchQuery['Artist']), $percent);
-
-                    if ($percent < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                } else if (isset($this->_searchQuery['Artist']) && isset($this->_searchQuery['Song'])) {
-                    $this->_logger->debug("Search by file name for song by artist");
-                    $artistFromFileName = explode("-", $songData->getFileName())[0];
-                    $songFromFileName = explode("-", $songData->getFileName())[1];
-
-                    $percentArtist = 100;
-                    similar_text(strtolower(trim($artistFromFileName)), strtolower($this->_searchQuery['Artist']), $percentArtist);
-                    $percentSongTitle = 100;
-                    similar_text(strtolower(trim($songFromFileName)), strtolower($this->_searchQuery['Song']), $percentSongTitle);
-                    $percentAvg = ($percentArtist + $percentSongTitle) / 2;
-
-                    if ($percentAvg < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                } else if (!isset($this->_searchQuery['Artist']) && isset($this->_searchQuery['Song'])) {
-                    $this->_logger->debug("Search by file name for song only");
-                    $songFromFileName = explode("-", $songData->getFileName())[1];
-                    $percent = 100;
-                    similar_text(strtolower(trim($songFromFileName)), strtolower($this->_searchQuery['Song']), $percent);
-
-                    if ($percent < $searchTextSimilarityPercentage) {
-                        continue;
-                    }
-                }
-            }
-            array_push($filteredSongsList, $songFile);
-        }
-
-        if ($hasSearchedPlaylist && empty($filteredSongsList)) {
-            throw new \Exception("The specified playlist '" . $this->_searchQuery['Playlist'] . "' is empty.");
-        }
-
-        $this->_getServiceParams()->setServiceParam('available_songs', $filteredSongsList);
-        return $filteredSongsList;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function setSearchQuery($searchQuery)
-    {
-        $this->_logger->debug("Setting query...");
-        $this->_searchQuery = $searchQuery;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function current(): Mp3File
-    {
-        $song = new Mp3File('', '', [], '');
-        if (isset($this->_getAvailableSongs()[$this->_getCurrentSongIndex()])) {
-            $song = $this->_getAvailableSongs()[$this->_getCurrentSongIndex()];
-        }
-        return $this->_prepareSong($song);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function next(): Mp3File
-    {
-        $song = new Mp3File('', '', [], '');
-        $songIndex = $this->_getNextSongIndex();
-
-        if (!empty($this->_getAvailableSongs()[$songIndex])) {
-            if ($this->_shouldMovePonter) {
-                $this->_setCurrentSongIndex($songIndex);
-            }
-            $songFile = $this->_getAvailableSongs()[$songIndex];
-            $song = $this->_prepareSong($songFile);
-        }
-
-        return $song;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function previous(): Mp3File
-    {
-        $song = new Mp3File('', '', [], '');
-        $songIndex = $this->_getPreviousSongIndex();
-        if (!empty($this->_getAvailableSongs()[$songIndex])) {
-            if ($this->_shouldMovePonter) {
-                $this->_setCurrentSongIndex($songIndex);
-            }
-            $songFile = $this->_getAvailableSongs()[$songIndex];
-            $song = $this->_prepareSong($songFile);
-        }
-
-        return $song;
-    }
-
-    public function first(): Mp3File
-    {
-        if ($this->_shouldMovePonter) {
-            $this->_setCurrentSongIndex(0);
-        }
-        return $this->_prepareSong($this->_getAvailableSongs()[0]);
-    }
-
-    public function last(): Mp3File
-    {
-        $songIndex = count($this->_getAvailableSongs()) - 1;
-        if ($this->_shouldMovePonter) {
-            $this->_setCurrentSongIndex($songIndex);
-        }
-        return $this->_prepareSong($this->_getAvailableSongs()[$songIndex]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setOffset($offset)
-    {
-        $this->_getServiceParams()->setServiceParam("current_song_offset", $offset);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getOffset(): int
-    {
-        $currentSongOffsetFromInstallation = $this->_getServiceParams()->getServiceParam("current_song_offset");
-
-        if (is_numeric($currentSongOffsetFromInstallation)) {
-            return $currentSongOffsetFromInstallation;
-        }
-
-        return 0;
-    }
-
-    public function movePointerTo($index)
-    {
-        $this->_setCurrentSongIndex($index);
-    }
-
-    public function getPointerPosition(): int
-    {
-        return $this->_getCurrentSongIndex();
-    }
-
-    public function setLoopStatus($loopStatus)
-    {
-        $this->_getServiceParams()->setServiceParam('loop_status', $loopStatus);
-    }
-
-    public function getLoopStatus(): bool
-    {
-        return $this->_getServiceParams()->getServiceParam('loop_status') ? $this->_getServiceParams()->getServiceParam('loop_status') : false;
-    }
-
-    public function setShouldMovePointer($shouldMovePointer = true)
-    {
-        $this->_shouldMovePonter = $shouldMovePointer;
-    }
-
-    /**
-     * @return string[]
-     */
-    private function _getAvailableSongs()
-    {
-        return $this->_getServiceParams()->getServiceParam("available_songs");
-    }
-
-    private function _setCurrentSongIndex($currentSongIndex) {
-        $this->_getServiceParams()->setServiceParam("current_song_index", $currentSongIndex);
-    }
-
-    private function _getCurrentSongIndex() {
-        $currentSongIndex = 0;
-        $currentSongIndexFromInstallation = $this->_getServiceParams()->getServiceParam("current_song_index");
-
-        if (is_numeric($currentSongIndexFromInstallation)) {
-            $currentSongIndex = $currentSongIndexFromInstallation;
-        }
-
-        $this->_setCurrentSongIndex($currentSongIndex);
-        return $currentSongIndex;
-    }
-
-    private function _getNextSongIndex() {
-        return $this->_getCurrentSongIndex() + 1;
-    }
-
-    private function _getPreviousSongIndex() {
-        return $this->_getCurrentSongIndex() - 1;
-    }
-
-    private function _prepareSong($songFile) {
-        $fileMetaData = [];
-
-        $this->_logger->debug("Song file path [" . $songFile . "]");
-        $dirName = basename(dirname($songFile));
-        $this->_logger->debug("Song dir path [" . $dirName . "]");
-        $songUrl = $this->_baseUrl . rawurlencode($dirName) . "/" . rawurlencode(basename($songFile));
-        if (in_array('mp3', explode("/", $this->_baseUrl)) && $dirName === 'mp3') {
-            $songUrl = $this->_baseUrl . rawurlencode(basename($songFile));
-        }
-
-        try {
-            $audio = new Mp3Info($songFile, true);
-            $fileMetaData = $audio->tags;
-        } catch (\Exception $e) {
-            $this->_logger->warning($e->getMessage());
-            return new Mp3File(basename($songFile), $songUrl, $fileMetaData, basename(dirname($songFile)));
-        }
-
-        $this->_logger->debug("Song file path [" . $songFile . "]");
-        $this->_logger->debug("Song URL [" . $songUrl . "]");
-
-        return new Mp3File(basename($songFile), $songUrl, $fileMetaData, basename(dirname($songFile)));
-    }
-
-    private function _getServiceParams() {
-        return $this->getService()->getServiceParams(IServiceParamsScope::SCOPE_TYPE_INSTALLATION);
-    }
-
-    private function _evaluateSting($data) {
-        $service = $this->getService();
-        return $service->evaluateString($data);
-    }
-
-    private function _getDirectoryDirectories($folderPath) {
-        $directoryDirectories = [];
-        foreach(new DirectoryIterator($folderPath) as $item) {
-            if (!$item->isDot() && $item->isDir()) {
-                array_push($directoryDirectories, $item->getFilename());
-            }
-        }
-        return $directoryDirectories;
-    }
-
-    private function _getDirectoryFiles($folderPath) {
-        $directoryFiles = [];
-        foreach(new DirectoryIterator($folderPath) as $item) {
-            if (!$item->isDot() && $item->isFile()) {
-                array_push($directoryFiles, $item->getFilename());
-            }
-        }
-        return $directoryFiles;
-    }
-
-    /**
-     * @inheritDoc
+     * {@inheritDoc}
+     * @see \Convo\Core\Workflow\IServiceContext::init()
      */
     public function init()
     {
-        $this->_id			    =	$this->_evaluateSting($this->_id);
-        $this->_baseFolderPath  =	$this->_evaluateSting($this->_baseFolderPath);
-        $this->_baseUrl		    =	$this->_evaluateSting($this->_baseUrl);
-        // check already set folderBase path if is right dir in the filesystem
-        if (!is_dir($this->_baseFolderPath)) {
-            // when the path is not a valid directory just return the playlist object with initial values
-            $this->_logger->warning("[" . $this->_baseFolderPath . "] is not a valid folder.");
-            $this->_getServiceParams()->setServiceParam('available_playlists', []);
-            throw new \Exception("'" . $this->_baseFolderPath . "' is not a valid folder.");
-        }
-
-        // set available playlists variable
-        $this->_availablePlaylistPaths = [$this->_baseFolderPath];
-        $this->_logger->debug("Going to print available playlists...");
-        $this->_logger->debug("Printing playlist [" . $this->_availablePlaylistPaths[0] . "]");
-        foreach ($this->_getDirectoryDirectories($this->_baseFolderPath) as $playlistFolder) {
-            $playlist = $this->_baseFolderPath . $playlistFolder;
-            $this->_logger->debug("Printing playlist [" . $playlist . "]");
-            array_push($this->_availablePlaylistPaths, $playlist);
-        }
     }
-
-    private function _getTargetPlaylist($searchQueryPlaylist) {
-        $targetPlaylist = null;
-        $searchTextSimilarityPercentage = 75;
-        $playlists = $this->_getDirectoryDirectories($this->_baseFolderPath);
-        $playlistCandidates = [];
-
-        foreach ($playlists as $playlist) {
-            $percent = 0;
-            similar_text(strtolower($playlist), strtolower($searchQueryPlaylist), $percent);
-            array_push($playlistCandidates, ["playlist" => $playlist, "score" => $percent]);
-        }
-
-        usort($playlistCandidates, function ($first, $second) {
-            return $first["score"] < $second["score"];
-        });
-
-        if ($playlistCandidates[0]["score"] > $searchTextSimilarityPercentage) {
-            $candidate = $playlistCandidates[0]["playlist"];
-            $targetPlaylist = $candidate;
-        } else {
-            $targetPlaylist = self::NOT_FOUND;
-        }
-
-        return $targetPlaylist;
-    }
-
+    
+    
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     * @see \Convo\Core\Workflow\AbstractBasicComponent::getId()
      */
     public function getId()
     {
         return $this->_id;
     }
-
+    
     /**
-     * @inheritDoc
+     * @return IMediaSourceContext
      */
     public function getComponent()
     {
         return $this;
+    }
+    
+    
+    // MEDIA
+    public function isEmpty() : bool
+    {
+        return empty( $this->getCount());
+    }
+    
+    public function isLast() : bool
+    {
+        $model          =   $this->_getQueryModel();
+        return $model['post_index'] >= $this->getCount();
+    }
+    
+    public function getCount() : int
+    {
+//         $query  =   $this->getWpQuery();
+//         return $query->post_count;
+    }
+    
+    public function next() : IAudioFile
+    {
+        $query      =   $this->getWpQuery();
+        if ( $query->found_posts === 1 && $this->getLoopStatus()) {
+            return $this->_getSong( 0);
+        }
+        
+        if ( $this->isLast()) {
+            if ( !$this->getLoopStatus()) {
+                throw new DataItemNotFoundException( 'Can\'t get next. Loop is off and we are on the last result.');
+            }
+            return $this->_getSong( 0);
+        }
+        $model      =   $this->_getQueryModel();
+        return $this->_getSong( $model['post_index'] + 1);
+    }
+    
+    public function current() : IAudioFile {
+        $model      =   $this->_getQueryModel();
+        return $this->_getSong( $model['post_index']);
+    }
+    
+    public function movePrevious() {
+        $model      =   $this->_getQueryModel();
+        $previous   =   $model['post_index'] - 1;
+        if ( $previous < 0) {
+            if ( !$model['loop_status']) {
+                throw new DataItemNotFoundException( 'Can\'t move previous. Already at last first result');
+            }
+            $query      =   $this->getWpQuery();
+            $previous   =   $query->post_count - 1;
+        }
+        $model['post_index'] = $previous;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function moveNext() {
+        $query  =   $this->getWpQuery();
+        $model  =   $this->_getQueryModel();
+        $next   =   $model['post_index'] + 1;
+        if ( $next > $query->post_count - 1) {
+            if ( !$model['loop_status']) {
+                throw new DataItemNotFoundException( 'Can\'t move next. Already at last result ['.$query->post_count.']');
+            }
+            $next   =   0;
+        }
+        $model['post_index'] = $next;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function seek( $index) {
+        $query  =   $this->getWpQuery();
+        
+        if ( $index > $query->post_count - 1) {
+            throw new DataItemNotFoundException( 'Can\'t move to the ['.$index.']. There are only ['.$query->post_count.'] songs');
+        }
+        if ( $index < 0) {
+            throw new DataItemNotFoundException( 'Can\'t move to the ['.$index.'].');
+        }
+        
+        $model  =   $this->_getQueryModel();
+        $model['post_index'] = $index;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function rewind() {
+        $model  =   $this->_getQueryModel();
+        $model['post_index'] = 0;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function getOffset() : int {
+        $model  =   $this->_getQueryModel();
+        return $model['song_offset'];
+    }
+    public function setOffset( $offset) {
+        $model  =   $this->_getQueryModel();
+        $model['song_offset'] = $offset;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function setStopped( $offset=-1) {
+        $model  =   $this->_getQueryModel();
+        if ( $offset >= 0) {
+            $model['song_offset'] = $offset;
+        }
+        $model['playing'] = false;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function setPlaying()
+    {
+        $model  =   $this->_getQueryModel();
+        $model['playing'] = true;
+        $this->_saveQueryModel( $model);
+    }
+    
+    public function setLoopStatus( $loopStatus) {
+        $model  =   $this->_getQueryModel();
+        $model['loop_status'] = $loopStatus;
+        $this->_saveQueryModel( $model);
+    }
+    public function getLoopStatus() : bool {
+        $model  =   $this->_getQueryModel();
+        return $model['loop_status'];
+    }
+    
+    public function setShuffleStatus( $shuffleStatus) {
+        $model  =   $this->_getQueryModel();
+        $model['shuffle_status'] = $shuffleStatus;
+        if ( $shuffleStatus) {
+            $this->_logger->info( 'Reseting post index and shuffling playlist');
+            $model['post_index'] = 0;
+            shuffle( $model['playlist']);
+        } else {
+            $real_index             =   $model['playlist'][$model['post_index']];
+            $this->_logger->info( 'Using real post index ['.$real_index.']');
+            $model['post_index']    =   $real_index;
+            sort( $model['playlist']);
+        }
+        $this->_saveQueryModel( $model);
+    }
+    public function getShuffleStatus() : bool {
+        $model  =   $this->_getQueryModel();
+        return $model['shuffle_status'];
+    }
+    
+    
+    // INFO
+    public function getMediaInfo() : array
+    {
+        $info   =   IMediaSourceContext::DEFAULT_MEDIA_INFO;
+        
+        // has to be before _getQueryModel() is called
+        if ( !$this->isEmpty()) {
+            $info['current'] = $this->current();
+            try {
+                $info['next'] = $this->next();
+            } catch ( DataItemNotFoundException $e) {
+                $this->_logger->debug( $e->getMessage());
+            }
+        }
+        
+        $model  =   $this->_getQueryModel();
+        
+        $info   =   array_merge( $info, [
+            'count' => $this->getCount(),
+            'last' => $this->isLast(),
+            'first' => $model['post_index'] === 0,
+            'song_no' => $model['post_index'] + 1,
+            'loop_status' => $model['loop_status'],
+            'shuffle_status' => $model['shuffle_status'],
+            'playing' => $model['playing'],
+        ]);
+        
+        $this->_logger->debug( 'Got current media info ['.print_r( $info, true).']');
+        
+        return $info;
+    }
+    
+    // QUERY
+    /**
+     * @param int $index
+     * @throws DataItemNotFoundException
+     * @return \Convo\Core\Media\IAudioFile
+     */
+    private function _getSong( $index)
+    {
+        $model      =   $this->_getQueryModel();
+        $real_index =   $model['playlist'][$index];
+        
+        $this->_logger->info( 'Getting song ['.$index.'] with real index ['.$real_index.']');
+        
+        $query  =   $this->getWpQuery();
+        $query->rewind_posts();
+        while ( $query->have_posts())
+        {
+            $query->the_post();
+            $post   =   $query->post;
+            $this->_logger->debug( 'Checking page post ['.$post->post_title.'] index ['.$query->current_post.']['.$real_index.']');
+            
+            if ( $query->current_post === $real_index)
+            {
+                $meta       =   wp_get_attachment_metadata( $post->ID);
+                //                 $this->_logger->debug( 'Post attachment meta ['.print_r( wp_get_attachment_metadata( $post->ID), true).']');
+                
+                $url        =   $this->_evaluateStringWithPost( $this->_songUrl, $post);
+                $url        =   $url ? $url : wp_get_attachment_url( $post->ID);
+                
+                $song_title =   $this->_evaluateStringWithPost( $this->_songTitle, $post);
+                $song_title =   $song_title ? $song_title : $meta['title'] ?? null;
+                $song_title =   $song_title ? $song_title : $post->post_title;
+                
+                $artist     =   $this->_evaluateStringWithPost( $this->_artist, $post);
+                $artist     =   $artist ? $artist : $meta['artist'] ?? null;
+                $artist     =   is_numeric( $artist) || empty( $artist) ? ($meta['album'] ?? null) : $artist;
+                
+                $artwork    =   $this->_evaluateStringWithPost( $this->_artworkUrl, $post);
+                $artwork    =   $artwork ? $artwork : get_the_post_thumbnail_url();
+                $artwork    =   $artwork ? $artwork : $this->_evaluateStringWithPost( $this->_defaultSongImageUrl, $post);
+                
+                $background =   $this->_evaluateStringWithPost( $this->_backgroundUrl, $post);
+                $this->_logger->info( 'Returning song ['.$url.']['.$song_title.']['.$artist.']['.$artwork.']['.$background.']');
+                return new Mp3File( $url, $song_title, $artist, $artwork, $background);
+            }
+        }
+        
+        throw new DataItemNotFoundException( 'Could not find post by real index ['.$real_index.']');
+    }
+    
+    // PERSISTANT MODEL NAVI
+    private function _getQueryModel()
+    {
+        $params =   $this->getService()->getComponentParams( \Convo\Core\Params\IServiceParamsScope::SCOPE_TYPE_INSTALLATION, $this);
+        $model  =   $params->getServiceParam( self::PARAM_NAME_QUERY_MODEL);
+        
+        if ( empty( $model)) {
+            $this->_logger->info( 'There is no saved model. Going to create default one.');
+            $model   =   [
+                'playing' => false,
+                'post_index' => 0,
+                'loop_status' => empty( $this->_defaultLoop) ? false : $this->getService()->evaluateString( $this->_defaultLoop),
+                'shuffle_status' => empty( $this->_defaultShuffle) ? false : $this->getService()->evaluateString( $this->_defaultShuffle),
+                'playlist' => [],
+                'song_offset' => 0,
+                'arguments' => [],
+            ];
+            $this->_saveQueryModel( $model);
+        }
+        
+        return $model;
+    }
+    
+    private function _saveQueryModel( $model)
+    {
+        $this->_logger->info( 'Saving query model ['.print_r( $model, true).']['.$this.']');
+        $params =   $this->getService()->getComponentParams( \Convo\Core\Params\IServiceParamsScope::SCOPE_TYPE_INSTALLATION, $this);
+        $params->setServiceParam( self::PARAM_NAME_QUERY_MODEL, $model);
+    }
+    
+    
+    // UTIL
+    public function __toString()
+    {
+        return parent::__toString().'['.$this->_id.']['.json_encode( $this->_baseFolderPath).']';
     }
 }
