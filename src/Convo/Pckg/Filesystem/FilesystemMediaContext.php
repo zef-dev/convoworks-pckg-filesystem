@@ -30,6 +30,9 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         
         $this->_search          =   $properties['search'];
         $this->_searchFolders   =   $properties['search_folders'];
+        
+        $this->_backgroundUrl           =   $properties['background_url'];
+        $this->_defaultSongImageUrl     =   $properties['default_song_image_url'];
     }
 
     
@@ -47,17 +50,14 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     
     
     // QUERY
-    /**
-     * @return IAudioFile[]
-     */
     public function getSongs()
     {
-        $base_path      =   $this->_evaluateSting( $this->_baseFolderPath);
+        $base_path      =   $this->_evaluateSting( $this->_folderPath);
         $base_url       =   $this->_evaluateSting( $this->_baseUrl);
         $search         =   $this->_evaluateSting( $this->_search);
         
         if ( isset( $this->_loadedSongs)) {
-            return $this->_loadedSongs;
+            return new \ArrayIterator( $this->_loadedSongs);
         }
         
         $this->_loadedSongs          =   [];
@@ -99,7 +99,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             }
         }
         
-        return $this->_loadedSongs;
+        return new \ArrayIterator( $this->_loadedSongs);
     }
     
     /**
@@ -118,6 +118,6 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     // UTIL
     public function __toString()
     {
-        return parent::__toString().'['.$this->_baseFolderPath.']['.$this->_baseUrl.']';
+        return parent::__toString().'['.$this->_folderPath.']['.$this->_baseUrl.']';
     }
 }
