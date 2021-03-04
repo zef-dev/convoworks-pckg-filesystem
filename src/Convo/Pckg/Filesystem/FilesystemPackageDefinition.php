@@ -29,12 +29,12 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                     'id' => array(
                         'editor_type' => 'text',
                         'editor_properties' => array(),
-                        'defaultValue' => '',
+                        'defaultValue' => 'search_media',
                         'name' => 'Context ID',
                         'description' => 'Unique ID by which this context is referenced',
                         'valueType' => 'string'
                     ),
-                    'mp3SourcePath' => array(
+                    'base_path' => array(
                         'editor_type' => 'text',
                         'editor_properties' => array(),
                         'defaultValue' => '',
@@ -42,19 +42,51 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                         'description' => 'Folder of MP3s',
                         'valueType' => 'string'
                     ),
-                    'mp3SourceBasePath' => array(
+                    'base_url' => array(
                         'editor_type' => 'text',
                         'editor_properties' => array(),
                         'defaultValue' => '',
-                        'name' => 'Public URL',
+                        'name' => 'Base URL',
                         'description' => 'Public URL to expose songs from',
+                        'valueType' => 'string'
+                    ),
+                    'background_url' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '',
+                        'name' => 'Background image',
+                        'description' => 'Background image url. Can be expression which will be evaluated in the service context.',
+                        'valueType' => 'string'
+                    ),
+                    'default_song_image_url' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '',
+                        'name' => 'Default song image',
+                        'description' => 'Default image for song artwork. Can be expression which will be evaluated in the service context.',
+                        'valueType' => 'string'
+                    ),
+                    'default_loop' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '',
+                        'name' => 'Default loop status',
+                        'description' => 'Empty (false) or expression (boolean) to have initial player loop state',
+                        'valueType' => 'string'
+                    ),
+                    'default_shuffle' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '',
+                        'name' => 'Default shuffle status',
+                        'description' => 'Empty (false) or expression (boolean) to have initial player shuffle state',
                         'valueType' => 'string'
                     ),
                     '_preview_angular' => array(
                         'type' => 'html',
                         'template' => '<div class="code">' .
-                            '<span class="statement">Reference playlist to </span> <b>{{ contextElement.properties.mp3SourcePath }}</b>' .
-                            '</div>'
+                        '<span class="statement">Filesystem Media </span> <b>[{{ contextElement.properties.id }}]</b>' .
+                        '</div>'
                     ),
                     '_help' =>  array(
                         'type' => 'file',

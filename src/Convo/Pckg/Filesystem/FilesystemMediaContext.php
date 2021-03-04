@@ -10,7 +10,7 @@ use Convo\Core\Workflow\AbstractMediaSourceContext;
 class FilesystemMediaContext extends AbstractMediaSourceContext
 {
 
-    private $_folderPath;
+    private $_basePath;
     private $_baseUrl;
     
     private $_search;
@@ -25,7 +25,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     {
         parent::__construct( $properties);
         
-        $this->_folderPath      =   $properties['folder_path'];
+        $this->_basePath        =   $properties['base_path'];
         $this->_baseUrl         =   $properties['base_url'];
         
         $this->_search          =   $properties['search'];
@@ -52,7 +52,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     // QUERY
     public function getSongs()
     {
-        $base_path      =   $this->_evaluateSting( $this->_folderPath);
+        $base_path      =   $this->_evaluateSting( $this->_basePath);
         $base_url       =   $this->_evaluateSting( $this->_baseUrl);
         $search         =   $this->_evaluateSting( $this->_search);
         
@@ -118,6 +118,6 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     // UTIL
     public function __toString()
     {
-        return parent::__toString().'['.$this->_folderPath.']['.$this->_baseUrl.']';
+        return parent::__toString().'['.$this->_basePath.']['.$this->_baseUrl.']';
     }
 }
