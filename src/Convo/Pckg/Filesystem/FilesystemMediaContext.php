@@ -84,7 +84,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             if ( $root_item->isFile()) 
             {
                 $file_path  =   $root_item->getRealPath();
-                $file_url   =   $base_url.'/'.$root_item->getFilename();
+                $file_url   =   $base_url.'/'.rawurlencode( $root_item->getFilename());
                 $song       =   new Mp3Id3File( $file_path, $file_url);
                 
                 if ( $this->_acceptsSong( $song, $search)) {
@@ -102,7 +102,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
                     }
                     
                     $file_path  =   $folder_file->getRealPath();
-                    $file_url   =   $base_url.'/'.$folder_file->getFilename();
+                    $file_url   =   $base_url.'/'.rawurlencode( $root_item->getFilename()).'/'.rawurlencode( $folder_file->getFilename());
                     $song       =   new Mp3Id3File( $file_path, $file_url);
                     
                     if ( $this->_acceptsSong( $song, $search)) {
