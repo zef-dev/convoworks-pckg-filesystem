@@ -41,7 +41,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     public function getCount() : int
     {
         if ( isset( $this->_loadedSongs)) {
-            return $this->_loadedSongs;
+            return count( $this->_loadedSongs);
         }
         
         return iterator_count( $this->getSongs());
@@ -60,7 +60,10 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             return new \ArrayIterator( $this->_loadedSongs);
         }
         
-        $this->_loadedSongs          =   [];
+        $model                  =   $this->_getQueryModel();
+        $this->_loadedSongs     =   [];
+        
+        $this->_logger->info( 'Scanning dir ['.$base_path.']');
         
         foreach( new DirectoryIterator( $base_path) as $root_item) 
         {
@@ -98,6 +101,30 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
                 }
             }
         }
+        
+        $args_changed       =   false;
+        $count              =   count( $this->_loadedSongs);
+        $count_changed      =   count( $model['playlist']) !== $count; 
+        
+        $this->_logger->info( 'Found total ['.$count.'] songs');
+        
+        if ( $count <= 0) {
+            $model['playlist']  =   [];
+        } else if ( $args_changed || $count_changed) {
+            if ( $count_changed) {
+                $this->_logger->warning( 'Generating playlist because model and query count are different');
+            } else {
+                $this->_logger->info( 'Generating playlist because arguments were changed');
+            }
+            
+            $model['playlist'] = range( 0, $count- 1);
+            if ( $model['shuffle_status']) {
+                $this->_logger->info( 'Shuffling playlist');
+                shuffle( $model['playlist']);
+            }
+        }
+        
+        $this->_saveQueryModel( $model);
         
         return new \ArrayIterator( $this->_loadedSongs);
     }
