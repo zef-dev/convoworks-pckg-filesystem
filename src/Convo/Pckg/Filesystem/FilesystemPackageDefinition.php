@@ -34,6 +34,22 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                         'description' => 'Unique ID by which this context is referenced',
                         'valueType' => 'string'
                     ),
+                    'search' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '',
+                        'name' => 'Search by',
+                        'description' => 'Search phrase to match songs by any available criteria',
+                        'valueType' => 'string'
+                    ),
+                    'search_folders' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '',
+                        'name' => 'Search folders',
+                        'description' => 'Search phrase to match the whole folders only (like playlists)',
+                        'valueType' => 'string'
+                    ),
                     'base_path' => array(
                         'editor_type' => 'text',
                         'editor_properties' => array(),
