@@ -55,11 +55,14 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         $base_path      =   $this->getService()->evaluateString( $this->_basePath);
         $base_url       =   $this->getService()->evaluateString( $this->_baseUrl);
         $search         =   $this->getService()->evaluateString( $this->_search);
+        $search_folders =   $this->getService()->evaluateString( $this->_searchFolders);
+        $artwork        =   $this->getService()->evaluateString( $this->_defaultSongImageUrl);
+        $background     =   $this->getService()->evaluateString( $this->_backgroundUrl);
         
-        $model              =   $this->_getQueryModel();
+        $model          =   $this->_getQueryModel();
         
-        $args               =   ['search' => $search];
-        $args_changed       =   $args != $model['arguments'];
+        $args           =   [ 'search' => $search, 'search_folders' => $search_folders];
+        $args_changed   =   $args != $model['arguments'];
         
         if ( isset( $this->_loadedSongs) && !$args_changed) {
             return new \ArrayIterator( $this->_loadedSongs);
@@ -73,50 +76,46 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         
         $this->_loadedSongs     =   [];
         
-        $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']');
+        $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']['.$search_folders.']');
         
-        foreach( new DirectoryIterator( $base_path) as $root_item) 
+        $folders_only   =   false;
+        if ( $search_folders && !$search) {
+            $folders_only   =   true;
+        }
+        
+        $root   =   new DirectoryIterator( $base_path);
+        
+        // READ ROOT FILES
+        if ( !$folders_only) {
+            $this->_loadedSongs =   array_merge(
+                $this->_loadedSongs,
+                $this->_readFolderSongs( true, $root, $base_url, $artwork, $background, $search));
+        }
+        
+        
+        foreach( $root as $root_item) 
         {
-            if ( $root_item->isDot()) {
+            if ( $root_item->isDot() || $root_item->isFile()) {
                 continue;
             }
             
-            if ( $root_item->isFile()) 
-            {
-                $file_path  =   $root_item->getRealPath();
-                $file_url   =   $base_url.'/'.rawurlencode( $root_item->getFilename());
-                
-                $artwork    =   $this->getService()->evaluateString( $this->_defaultSongImageUrl);
-                $background =   $this->getService()->evaluateString( $this->_backgroundUrl);
-                
-                $song       =   new Mp3Id3File( $file_path, $file_url, $artwork, $background);
-                
-                if ( $this->_acceptsSong( $song, $search)) {
-                    $this->_loadedSongs[]  =   $song;
-                }
-                continue;
-            } 
-            
             if ( $root_item->isDir()) 
             {
-                foreach( new DirectoryIterator( $root_item->getRealPath()) as $folder_file)
-                {
-                    if ( $folder_file->isDot() || !$folder_file->isFile()) {
+                if ( $folders_only) {
+                    if ( !$this->_acceptsFolder( $root_item->getFilename(), $search_folders)) {
                         continue;
                     }
-                    
-                    $file_path  =   $folder_file->getRealPath();
-                    $file_url   =   $base_url.'/'.rawurlencode( $root_item->getFilename()).'/'.rawurlencode( $folder_file->getFilename());
-                    
-                    $artwork    =   $this->getService()->evaluateString( $this->_defaultSongImageUrl);
-                    $background =   $this->getService()->evaluateString( $this->_backgroundUrl);
-                    
-                    $song       =   new Mp3Id3File( $file_path, $file_url, $artwork, $background);
-                    
-                    if ( $this->_acceptsSong( $song, $search)) {
-                        $this->_loadedSongs[]  =   $song;
-                    }
+                    $this->_logger->info( 'Loading full folder dir ['.$root_item->getFilename().']');
+                    $this->_loadedSongs =   array_merge(
+                        $this->_loadedSongs,
+                        $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background));
+                    continue;
                 }
+                
+                $this->_logger->debug( 'Scanning folder dir ['.$root_item->getFilename().']');
+                $this->_loadedSongs =   array_merge(
+                    $this->_loadedSongs,
+                    $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background, $search));
             }
         }
         
@@ -146,6 +145,36 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         return new \ArrayIterator( $this->_loadedSongs);
     }
     
+    private function _readFolderSongs( $root, DirectoryIterator $folder, $baseUrl, $artwork, $background, $search=null) 
+    {
+        $songs  =   [];
+        
+        foreach( new DirectoryIterator( $folder->getRealPath()) as $folder_file)
+        {
+            if ( $folder_file->isDot() || !$folder_file->isFile()) {
+                continue;
+            }
+            
+            if ( $root) {
+                $file_url   =   $baseUrl.'/'.rawurlencode( $folder_file->getFilename());
+            } else {
+                $file_url   =   $baseUrl.'/'.rawurlencode( $folder->getFilename()).'/'.rawurlencode( $folder_file->getFilename());
+            }
+            
+            $song       =   new Mp3Id3File( $folder_file->getRealPath(), $file_url, $artwork, $background);
+            
+            if ( $search) {
+                if ( $this->_acceptsSong( $song, $search)) {
+                    $songs[]  =   $song;
+                }
+            } else {
+                $songs[]  =   $song;
+            }
+        }
+        
+        return $songs;
+    }
+    
     /**
      * @param IAudioFile $song
      * @param string $search
@@ -162,6 +191,19 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         }
         
         if ( stripos( $song->getArtist(), $search) !== false) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private function _acceptsFolder( $folder, $searchFolder) {
+        
+        if ( empty( $searchFolder)) {
+            return true;
+        }
+        
+        if ( stripos( $folder, $searchFolder) !== false) {
             return true;
         }
         
