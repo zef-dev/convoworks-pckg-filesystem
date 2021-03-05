@@ -1,16 +1,33 @@
 <div class="media-context-help">
     <h3>Media Context</h3>
     
-    <p>Setup params for MP3 files.</p>
+    <p>Reads mp3 files from the filesystem and exposes it as a media source for media related components</p>
 
-    <h3>When to use?</h3>
-
-    <p>When we want to create media player with mp3 files and play it through device.</p>
-
-    <h3>How to use: </h3>
-	<ol>
-		<li>In the <b>CONTEXT ID</b> field, enter the same name as the name of the <b>Media block</b>, <i>example: filesystemMediaContext</i></li>
-		<li>In the <b>MP3 FOLDER PATH</b> field, enter the path to folder with mp3 files, <i>example: C:/Users/Admin/Documents/mp3</i></li>
-		<li>In the <b>PUBLIC URL</b> field, enter the public URL to expose songs from, <i>example: https://www.example.com/mp3/</i></li>
-	</ol>
+    <h3>Minimal setup</h3>
+    <p>
+        Just enter the base path, where are files located physically, and base url to form publicly accessible url for mp3 files.
+    </p>
+    
+    <h3>Search functionality</h3>
+    <p>
+        If you provide search criteria, the song’s title and artist will be matched against it.
+        If you provide folder search criteria only, only complete folders will be taken in count.
+    </p>
+        
+    <h3>Media info</h3>
+    <p>
+        Media Context provides media info data which you can use through connected components (e.g. Media info element, Media block). 
+        In these components, you will provide a name under which this data (associative array) will be available and here are the fields it consists of.
+    </p>      
+    <ul style="padding-left: 15px; list-style: disc;">
+        <li><b>current</b> IAudioFile, current song</li>
+        <li><b>next</b> IAudioFile, next song if exists</li>
+        <li><b>count</b> integer, playlist songs count</li>
+        <li><b>last</b> boolean, is the current song the last</li>
+        <li><b>first</b> boolean, is the current song the first</li>
+        <li><b>song_no</b> integer, current song, starting from 1</li>
+        <li><b>loop_status</b> boolean, is the loop mode enabled</li>
+        <li><b>shuffle_status</b> boolean, is the shuffle enabled</li>
+        <li><b>playing</b> boolean, is the player currently playing</li>
+    </ul>
 </div>
