@@ -73,7 +73,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         
         $this->_loadedSongs     =   [];
         
-        $this->_logger->info( 'Scanning dir ['.$base_path.']');
+        $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']');
         
         foreach( new DirectoryIterator( $base_path) as $root_item) 
         {
@@ -145,9 +145,19 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
      */
     private function _acceptsSong( $song, $search) {
         
-        $this->_logger->warning( 'Not implemenetd');
+        if ( empty( $search)) {
+            return true;
+        }
         
-        return true;
+        if ( stripos( $song->getSongTitle(), $search) !== false) {
+            return true;
+        }
+        
+        if ( stripos( $song->getArtist(), $search) !== false) {
+            return true;
+        }
+        
+        return false;
     }
     
     
