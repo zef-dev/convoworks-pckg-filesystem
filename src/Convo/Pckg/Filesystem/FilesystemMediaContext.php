@@ -52,9 +52,9 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     // QUERY
     public function getSongs()
     {
-        $base_path      =   $this->_evaluateSting( $this->_basePath);
-        $base_url       =   $this->_evaluateSting( $this->_baseUrl);
-        $search         =   $this->_evaluateSting( $this->_search);
+        $base_path      =   $this->getService()->evaluateString( $this->_basePath);
+        $base_url       =   $this->getService()->evaluateString( $this->_baseUrl);
+        $search         =   $this->getService()->evaluateString( $this->_search);
         
         if ( isset( $this->_loadedSongs)) {
             return new \ArrayIterator( $this->_loadedSongs);
