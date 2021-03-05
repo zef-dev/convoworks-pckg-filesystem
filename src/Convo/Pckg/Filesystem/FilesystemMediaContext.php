@@ -56,11 +56,21 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         $base_url       =   $this->getService()->evaluateString( $this->_baseUrl);
         $search         =   $this->getService()->evaluateString( $this->_search);
         
-        if ( isset( $this->_loadedSongs)) {
+        $model              =   $this->_getQueryModel();
+        
+        $args               =   ['search' => $search];
+        $args_changed       =   $args != $model['arguments'];
+        
+        if ( isset( $this->_loadedSongs) && !$args_changed) {
             return new \ArrayIterator( $this->_loadedSongs);
         }
         
-        $model                  =   $this->_getQueryModel();
+        if ( $args_changed) {
+            $this->_logger->info( 'Arguments changed. Storing them and rewinding results ...');
+            $model['arguments']     =   $args;
+            $model['post_index']    =   0;
+        }
+        
         $this->_loadedSongs     =   [];
         
         $this->_logger->info( 'Scanning dir ['.$base_path.']');
@@ -102,7 +112,6 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             }
         }
         
-        $args_changed       =   false;
         $count              =   count( $this->_loadedSongs);
         $count_changed      =   count( $model['playlist']) !== $count; 
         
