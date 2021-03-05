@@ -116,30 +116,32 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                 $this->getNamespace(),
                 '\Convo\Pckg\Filesystem\Elements\JsonReader',
                 'JSON Reader',
-                'URL',
+                'Tries to read json file from the given location. As it uses "file_get_contents" you can use it with urls too',
                 array(
                     'scope_type' => array(
                         'editor_type' => 'select',
                         'editor_properties' => array(
                             'options' => array('session' => 'Session', 'installation' => 'Installation', 'request' => 'Request'),
                         ),
-                        'defaultValue' => 'session',
+                        'defaultValue' => 'request',
                         'name' => 'Scope type',
                         'description' => 'Id under which parameters are stored',
                         'valueType' => 'string'
                     ),
                     'url' => array(
-                        'editor_type' => 'ssml',
+                        'editor_type' => 'text',
                         'editor_properties' => array(),
                         'defaultValue' => '',
-                        'name' => 'URL',
+                        'name' => 'Path or URL',
+                        'description' => 'Location from which to read file',
                         'valueType' => 'string'
                     ),
                     'var' => array(
-                        'editor_type' => 'ssml',
+                        'editor_type' => 'text',
                         'editor_properties' => array(),
-                        'defaultValue' => '',
-                        'name' => 'VAR',
+                        'defaultValue' => 'status',
+                        'name' => 'Result variable',
+                        'description' => 'Name of the variable where the result of the operation will be stored',
                         'valueType' => 'string'
                     ),
                     'decode' => array(
@@ -165,10 +167,10 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                 $this->getNamespace(),
                 '\Convo\Pckg\Filesystem\Elements\FileReader',
                 'File Reader',
-                'Folders and Files',
+                'Reads files or folders from the given location',
                 array(
                     'basePath' => array(
-                        'editor_type' => 'ssml',
+                        'editor_type' => 'text',
                         'editor_properties' => array(),
                         'defaultValue' => '',
                         'name' => 'basePath',
@@ -181,14 +183,15 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                         ),
                         'defaultValue' => 'folders',
                         'name' => 'Mode',
-                        'description' => '',
+                        'description' => 'Try to read folders or files',
                         'valueType' => 'string'
                     ),
                     'var' => array(
-                        'editor_type' => 'ssml',
+                        'editor_type' => 'text',
                         'editor_properties' => array(),
-                        'defaultValue' => '',
-                        'name' => 'VAR',
+                        'defaultValue' => 'status',
+                        'name' => 'Result variable',
+                        'description' => 'Name of the variable where the result of the operation will be stored',
                         'valueType' => 'string'
                     ),
                     '_preview_angular' => array(
