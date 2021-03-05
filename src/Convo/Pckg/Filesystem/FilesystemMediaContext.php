@@ -155,6 +155,10 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
                 continue;
             }
             
+            if ( strtolower( $folder_file->getExtension()) !== 'mp3') {
+                continue; 
+            }
+            
             if ( $root) {
                 $file_url   =   $baseUrl.'/'.rawurlencode( $folder_file->getFilename());
             } else {
