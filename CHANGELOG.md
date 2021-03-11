@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [Current development]
+
+* Filesystem media context refactored to foolow new `IMediaSourceContext` interface
+
+## [Releases]
+
 ## 1.0.5 - 2021-02-22
 
 * use convoworks-core v0.20
