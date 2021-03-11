@@ -6,5 +6,6 @@
         "intents",
         "templates"
     ],
-    "description": "Interact with the filesystem by reading files, loading JSON, or playing music."
+    "description": "Interact with the filesystem by reading files, loading JSON, or playing music.",
+    "stability": "experimental"
 }
