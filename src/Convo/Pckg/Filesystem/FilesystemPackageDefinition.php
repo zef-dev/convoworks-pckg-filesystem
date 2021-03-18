@@ -23,8 +23,8 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
             new \Convo\Core\Factory\ComponentDefinition(
                 $this->getNamespace(),
                 '\Convo\Pckg\Filesystem\FilesystemMediaContext',
-                'Media source context',
-                'Setup params for MP3 files',
+                'Filesystem mp3 source',
+                'Scans the given folder and exposes result as media player source',
                 array(
                     'id' => array(
                         'editor_type' => 'text',
