@@ -101,15 +101,18 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             
             if ( $root_item->isDir()) 
             {
-                if ( $folders_only) {
-                    if ( !$this->_acceptsFolder( $root_item->getFilename(), $search_folders)) {
+                if ( $search_folders) {
+                    $accepts_folder =   $this->_acceptsFolder( $root_item->getFilename(), $search_folders);
+                    if ( $folders_only && !$accepts_folder) {
                         continue;
                     }
-                    $this->_logger->info( 'Loading full folder dir ['.$root_item->getFilename().']');
-                    $this->_loadedSongs =   array_merge(
-                        $this->_loadedSongs,
-                        $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background));
-                    continue;
+                    if ( $accepts_folder) {
+                        $this->_logger->info( 'Loading full folder dir ['.$root_item->getFilename().']');
+                        $this->_loadedSongs =   array_merge(
+                            $this->_loadedSongs,
+                            $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background));
+                        continue;
+                    }
                 }
                 
                 $this->_logger->debug( 'Scanning folder dir ['.$root_item->getFilename().']');
