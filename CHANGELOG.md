@@ -4,6 +4,10 @@
 
 ## [Releases]
 
+## 1.1.1 - 2021-05-14
+
+* Use `convoworks-core` v0.22.0
+
 ## 1.1.0 - 2021-03-27
 
 * Filesystem media context refactored to follow the new `IMediaSourceContext` interface
