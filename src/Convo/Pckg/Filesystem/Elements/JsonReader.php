@@ -45,7 +45,9 @@ class JsonReader extends \Convo\Core\Workflow\AbstractWorkflowComponent implemen
         {
             $this->_logger->debug('JSON is valid');
 
-            if( $this->_decode) {
+            $decode = strpos($this->_decode, '${') !== false ? $this->evaluateString($this->_decode) : $this->_decode;
+
+            if($decode) {
                 $json  =   \Convo\Core\Util\ArrayUtil::arrayWalk( $json, function ( $val) {
                     if ( is_string( $val)) {
                         $val    =   html_entity_decode( $val, ENT_QUOTES);
