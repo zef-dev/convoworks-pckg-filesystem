@@ -121,7 +121,7 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                     'scope_type' => array(
                         'editor_type' => 'select',
                         'editor_properties' => array(
-                            'options' => array('session' => 'Session', 'installation' => 'Installation', 'request' => 'Request'),
+                            'options' => array('session' => 'Session', 'installation' => 'Installation', 'request' => 'Request', 'user' => 'User'),
                         ),
                         'defaultValue' => 'request',
                         'name' => 'Scope type',
