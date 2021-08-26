@@ -598,7 +598,7 @@
                                                     "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
                                                     "namespace": "convo-core",
                                                     "properties": {
-                                                        "scope_type": "installation",
+                                                        "scope_type": "user",
                                                         "properties": {
                                                             "search": "${result.Artist}",
                                                             "search_folder": "${result.Artist}"
@@ -618,7 +618,7 @@
                                                                 "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
                                                                 "namespace": "convo-core",
                                                                 "properties": {
-                                                                    "scope_type": "installation",
+                                                                    "scope_type": "user",
                                                                     "properties": {
                                                                         "search": "${result.Song}",
                                                                         "search_folder": ""
@@ -640,7 +640,7 @@
                                                                 "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
                                                                 "namespace": "convo-core",
                                                                 "properties": {
-                                                                    "scope_type": "installation",
+                                                                    "scope_type": "user",
                                                                     "properties": {
                                                                         "search": "${result.Genre}",
                                                                         "search_folder": "${result.Genre}"
@@ -662,7 +662,7 @@
                                                                 "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
                                                                 "namespace": "convo-core",
                                                                 "properties": {
-                                                                    "scope_type": "installation",
+                                                                    "scope_type": "user",
                                                                     "properties": {
                                                                         "search": "${result.Playlist}",
                                                                         "search_folder": "${result.Playlist}"
@@ -680,7 +680,7 @@
                                                     "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
                                                     "namespace": "convo-core",
                                                     "properties": {
-                                                        "scope_type": "installation",
+                                                        "scope_type": "user",
                                                         "properties": {
                                                             "search": "",
                                                             "search_folder": ""
@@ -737,7 +737,7 @@
                                         "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
                                         "namespace": "convo-core",
                                         "properties": {
-                                            "scope_type": "installation",
+                                            "scope_type": "user",
                                             "properties": {
                                                 "search": "",
                                                 "search_folder": ""
