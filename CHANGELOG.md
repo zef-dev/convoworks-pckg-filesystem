@@ -4,6 +4,10 @@
 
 ## [Releases]
 
+## 1.1.2 - 2021-12-03
+
+* Fix `_decode` property in `JsonReader`
+
 ## 1.1.1 - 2021-05-14
 
 * Use `convoworks-core` v0.22.0
