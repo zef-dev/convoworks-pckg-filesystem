@@ -2,6 +2,7 @@
 
 namespace Convo\Pckg\Filesystem;
 
+use Convo\Core\Util\StrUtil;
 use DirectoryIterator;
 use Convo\Core\Media\IAudioFile;
 use Convo\Core\Media\Mp3Id3File;
@@ -9,6 +10,7 @@ use Convo\Core\Workflow\AbstractMediaSourceContext;
 
 class FilesystemMediaContext extends AbstractMediaSourceContext
 {
+    const MIN_MATCH_PERCENT = 50;
 
     private $_basePath;
     private $_baseUrl;
@@ -192,12 +194,12 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         if ( empty( $search)) {
             return true;
         }
-        
-        if ( stripos( $song->getSongTitle(), $search) !== false) {
+
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getSongTitle(), $search) >= self::MIN_MATCH_PERCENT) {
             return true;
         }
-        
-        if ( stripos( $song->getArtist(), $search) !== false) {
+
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getArtist(), $search) >= self::MIN_MATCH_PERCENT) {
             return true;
         }
         
@@ -209,8 +211,8 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         if ( empty( $searchFolder)) {
             return true;
         }
-        
-        if ( stripos( $folder, $searchFolder) !== false) {
+
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $folder, $searchFolder) >= self::MIN_MATCH_PERCENT) {
             return true;
         }
         
