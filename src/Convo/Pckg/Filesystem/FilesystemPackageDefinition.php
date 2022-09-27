@@ -34,6 +34,14 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
                         'description' => 'Unique ID by which this context is referenced',
                         'valueType' => 'string'
                     ),
+                    'min_match_percentage' => array(
+                        'editor_type' => 'text',
+                        'editor_properties' => array(),
+                        'defaultValue' => '80',
+                        'name' => 'Min. Match Percentage',
+                        'description' => 'Percent accuracy match when comparing the search query with strings of an available items',
+                        'valueType' => 'string'
+                    ),
                     'search' => array(
                         'editor_type' => 'text',
                         'editor_properties' => array(),

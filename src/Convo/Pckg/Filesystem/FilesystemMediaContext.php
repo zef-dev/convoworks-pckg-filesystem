@@ -10,11 +10,12 @@ use Convo\Core\Workflow\AbstractMediaSourceContext;
 
 class FilesystemMediaContext extends AbstractMediaSourceContext
 {
-    const MIN_MATCH_PERCENT = 50;
+    const MIN_MATCH_PERCENT = 80;
 
     private $_basePath;
     private $_baseUrl;
-    
+
+    private $_minMatchPercentage;
     private $_search;
     private $_searchFolders;
     
@@ -22,14 +23,17 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     private $_defaultSongImageUrl;
 
     private $_loadedSongs;
-    
+
+    private $_addedSearchFolders = [];
+
     public function __construct( $properties)
     {
         parent::__construct( $properties);
         
         $this->_basePath        =   $properties['base_path'];
         $this->_baseUrl         =   $properties['base_url'];
-        
+
+        $this->_minMatchPercentage          =   $properties['min_match_percentage'] ?? self::MIN_MATCH_PERCENT;
         $this->_search          =   $properties['search'];
         $this->_searchFolders   =   $properties['search_folders'];
         
@@ -56,11 +60,24 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     {
         $base_path      =   $this->getService()->evaluateString( $this->_basePath);
         $base_url       =   $this->getService()->evaluateString( $this->_baseUrl);
+        $min_match_percentage         =   $this->getService()->evaluateString( $this->_minMatchPercentage);
         $search         =   $this->getService()->evaluateString( $this->_search);
         $search_folders =   $this->getService()->evaluateString( $this->_searchFolders);
         $artwork        =   $this->getService()->evaluateString( $this->_defaultSongImageUrl);
         $background     =   $this->getService()->evaluateString( $this->_backgroundUrl);
-        
+
+        if (!is_numeric($min_match_percentage)) {
+            $min_match_percentage = self::MIN_MATCH_PERCENT;
+        }
+
+        if (is_string($min_match_percentage) && is_numeric($min_match_percentage)) {
+            $min_match_percentage = intval($min_match_percentage);
+        }
+
+        if ($min_match_percentage < 0 || $min_match_percentage > 100) {
+            $min_match_percentage = self::MIN_MATCH_PERCENT;
+        }
+
         $model          =   $this->_getQueryModel();
         
         $args           =   [ 'search' => $search, 'search_folders' => $search_folders];
@@ -77,9 +94,9 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         }
         
         $this->_loadedSongs     =   [];
-        
-        $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']['.$search_folders.']');
-        
+
+        $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']['.$search_folders.'] with min match percentage ['.$min_match_percentage.']');
+
         $folders_only   =   false;
         if ( $search_folders && !$search) {
             $folders_only   =   true;
@@ -91,11 +108,12 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         if ( !$folders_only) {
             $this->_loadedSongs =   array_merge(
                 $this->_loadedSongs,
-                $this->_readFolderSongs( true, $root, $base_url, $artwork, $background, $search));
+                $this->_readFolderSongs( true, $root, $base_url, $artwork, $background, $search, $min_match_percentage));
         }
-        
-        
-        foreach( $root as $root_item) 
+
+        $bestMatchedFolder = $this->_getBestMatchedFolder($search_folders, $base_path, $min_match_percentage);
+
+        foreach( $root as $root_item)
         {
             if ( $root_item->isDot() || $root_item->isFile()) {
                 continue;
@@ -103,8 +121,8 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             
             if ( $root_item->isDir()) 
             {
-                if ( $search_folders) {
-                    $accepts_folder =   $this->_acceptsFolder( $root_item->getFilename(), $search_folders);
+                if ( !empty($bestMatchedFolder)) {
+                    $accepts_folder =   $this->_acceptsFolder( $root_item->getFilename(), $bestMatchedFolder);
                     if ( $folders_only && !$accepts_folder) {
                         continue;
                     }
@@ -120,7 +138,8 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
                 $this->_logger->debug( 'Scanning folder dir ['.$root_item->getFilename().']');
                 $this->_loadedSongs =   array_merge(
                     $this->_loadedSongs,
-                    $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background, $search));
+                    $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background, $search, $min_match_percentage)
+                );
             }
         }
         
@@ -173,7 +192,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             $song       =   new Mp3Id3File( $folder_file->getRealPath(), $file_url, $artwork, $background);
             
             if ( $search) {
-                if ( $this->_acceptsSong( $song, $search)) {
+                if ( $this->_acceptsSong( $song, $search, $minMatchPercentage)) {
                     $songs[]  =   $song;
                 }
             } else {
@@ -189,17 +208,17 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
      * @param string $search
      * @return bool
      */
-    private function _acceptsSong( $song, $search) {
-        
+    private function _acceptsSong( $song, $search, $minMatchPercentage) {
+
         if ( empty( $search)) {
             return true;
         }
 
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getSongTitle(), $search) >= self::MIN_MATCH_PERCENT) {
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getSongTitle(), $search) >= $minMatchPercentage) {
             return true;
         }
 
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getArtist(), $search) >= self::MIN_MATCH_PERCENT) {
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getArtist(), $search) >= $minMatchPercentage) {
             return true;
         }
         
@@ -212,14 +231,45 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             return true;
         }
 
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $folder, $searchFolder) >= self::MIN_MATCH_PERCENT) {
+        if ( stripos( $folder, $searchFolder) !== false) {
             return true;
         }
         
         return false;
     }
-    
-    
+
+    private function _addSearchFolder($folderName, $search) {
+        $this->_addedSearchFolders[$folderName] = StrUtil::getTextSimilarityPercentageBetweenTwoStrings($folderName, $search);
+    }
+
+    /**
+     * @param string $search_folders
+     * @param string $base_path
+     * @return string
+     */
+    private function _getBestMatchedFolder(string $search_folders, string $base_path, $minMatchPercentage): string
+    {
+        $bestMatchedFolder = '';
+
+        if (!empty($search_folders)) {
+            $folderNames = scandir($base_path);
+            if (!empty($folderNames)) {
+                foreach ($folderNames as $folderName) {
+                    $this->_addSearchFolder($folderName, $search_folders);
+                }
+                $value = max($this->_addedSearchFolders);
+                if ($value >= $minMatchPercentage) {
+                    $key = array_search($value, $this->_addedSearchFolders);
+                    if ($key !== false && is_string($key)) {
+                        $bestMatchedFolder = $key;
+                    }
+                }
+            }
+        }
+
+        return $bestMatchedFolder;
+    }
+
     // UTIL
     public function __toString()
     {
