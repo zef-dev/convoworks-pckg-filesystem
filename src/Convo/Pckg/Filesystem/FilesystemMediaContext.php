@@ -168,8 +168,8 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         
         return new \ArrayIterator( $this->_loadedSongs);
     }
-    
-    private function _readFolderSongs( $root, DirectoryIterator $folder, $baseUrl, $artwork, $background, $search=null) 
+
+    private function _readFolderSongs( $root, DirectoryIterator $folder, $baseUrl, $artwork, $background, $search=null, $minMatchPercentage=self::MIN_MATCH_PERCENT)
     {
         $songs  =   [];
         
