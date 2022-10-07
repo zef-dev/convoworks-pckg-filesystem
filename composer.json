@@ -10,7 +10,6 @@
     "version": "1.1.2",
     "require" : {
         "php" : "^7.2",
-        "wapmorgan/mp3info": "^0.0.5",
         "psr/log" : "^1.1.0",
         "zef-dev/convoworks-core" : "^0.22"
     },
