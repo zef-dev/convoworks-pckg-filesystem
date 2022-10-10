@@ -204,7 +204,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     }
     
     /**
-     * @param IAudioFile $song
+     * @param Mp3Id3File $song
      * @param string $search
      * @return bool
      */
@@ -221,7 +221,15 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getArtist(), $search) >= $minMatchPercentage) {
             return true;
         }
-        
+
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getGenre(), $search) >= $minMatchPercentage) {
+            return true;
+        }
+
+        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getAlbum(), $search) >= $minMatchPercentage) {
+            return true;
+        }
+
         return false;
     }
     
@@ -243,11 +251,11 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
     }
 
     /**
-     * @param string $search_folders
-     * @param string $base_path
+     * @param $search_folders
+     * @param $base_path
      * @return string
      */
-    private function _getBestMatchedFolder(string $search_folders, string $base_path, $minMatchPercentage): string
+    private function _getBestMatchedFolder( $search_folders, $base_path, $minMatchPercentage): string
     {
         $bestMatchedFolder = '';
 
