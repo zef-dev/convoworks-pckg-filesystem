@@ -4,7 +4,6 @@ namespace Convo\Pckg\Filesystem;
 
 use Convo\Core\Util\StrUtil;
 use DirectoryIterator;
-use Convo\Core\Media\IAudioFile;
 use Convo\Core\Media\Mp3Id3File;
 use Convo\Core\Workflow\AbstractMediaSourceContext;
 
