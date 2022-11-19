@@ -170,6 +170,11 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
 
     private function _readFolderSongs( $root, DirectoryIterator $folder, $baseUrl, $artwork, $background, $search=null, $minMatchPercentage=self::MIN_MATCH_PERCENT)
     {
+        if (preg_match('/"([^"]+)"/', $search, $m)) {
+            $this->_logger->warning( 'Quickfix: Corrrecting serach term ['.$search.'] to ['.$m[1].']');
+            $search = $m[1];
+        }
+        
         $songs  =   [];
         
         foreach( new DirectoryIterator( $folder->getRealPath()) as $folder_file)
@@ -193,6 +198,8 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             if ( $search) {
                 if ( $this->_acceptsSong( $song, $search, $minMatchPercentage)) {
                     $songs[]  =   $song;
+                } else if ( stripos( $folder_file->getBasename(), $search) !== false) {
+                    $songs[] = $song;
                 }
             } else {
                 $songs[]  =   $song;
