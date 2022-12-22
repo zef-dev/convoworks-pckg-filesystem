@@ -3743,217 +3743,6 @@
                             }
                         },
                         {
-                            "class": "\\Convo\\Pckg\\Core\\Elements\\RunOnceElement",
-                            "namespace": "convo-core",
-                            "properties": {
-                                "scope_type": "installation",
-                                "name": "Playing the first song",
-                                "child": [
-                                    {
-                                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                        "namespace": "convo-core",
-                                        "properties": {
-                                            "comment": "First track message",
-                                            "context": null,
-                                            "_component_id": "mbka5gno-wgjh-gemi-hr3j-5wfeqemw3x77"
-                                        }
-                                    },
-                                    {
-                                        "class": "\\Convo\\Pckg\\Core\\Elements\\IfElement",
-                                        "namespace": "convo-core",
-                                        "properties": {
-                                            "test": "${last_media_info.last && last_media_info.first}",
-                                            "then": [
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "comment": "Only track - search cleanup in case of an error",
-                                                        "context": null,
-                                                        "_component_id": "jy5w1hqb-gbti-m9oi-ubsg-bufqxoqy4wjg"
-                                                    }
-                                                },
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "scope_type": "installation",
-                                                        "properties": {
-                                                            "search": "",
-                                                            "search_folder": ""
-                                                        },
-                                                        "_component_id": "w5wrbxao-t1cp-rz3q-dho7-94r3mxyvyvvl",
-                                                        "parameters": "service"
-                                                    }
-                                                }
-                                            ],
-                                            "else_if": [],
-                                            "else": [
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "type": "default",
-                                                        "text": "Starting the first track.",
-                                                        "append": false,
-                                                        "alexa_domain": "normal",
-                                                        "alexa_emotion": "neutral",
-                                                        "alexa_emotion_intensity": "medium",
-                                                        "_component_id": "g0tgnuxu-mpoq-dtyk-e4ll-4v5vqioqvk4p"
-                                                    }
-                                                }
-                                            ],
-                                            "_component_id": "spchmqe1-is15-qehx-hhje-3mzsa0btqdxg"
-                                        }
-                                    }
-                                ],
-                                "else": [
-                                    {
-                                        "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                        "namespace": "convo-core",
-                                        "properties": {
-                                            "comment": "Last track message",
-                                            "context": null,
-                                            "_component_id": "quniyvfk-1atu-z1jo-nkci-ybrvp0mxybcb"
-                                        }
-                                    },
-                                    {
-                                        "class": "\\Convo\\Pckg\\Core\\Elements\\IfElement",
-                                        "namespace": "convo-core",
-                                        "properties": {
-                                            "test": "${last_media_info.last && !last_media_info.first}",
-                                            "then": [
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\IfElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "test": "${search}",
-                                                        "then": [
-                                                            {
-                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                                                "namespace": "convo-core",
-                                                                "properties": {
-                                                                    "type": "default",
-                                                                    "text": "Playing the last ${last_media_info.current.artist} track.",
-                                                                    "append": false,
-                                                                    "alexa_domain": "normal",
-                                                                    "alexa_emotion": "neutral",
-                                                                    "alexa_emotion_intensity": "medium",
-                                                                    "_component_id": "i6oescx4-bt7y-d39i-tlqg-fs8evftvu00x"
-                                                                }
-                                                            }
-                                                        ],
-                                                        "else_if": [],
-                                                        "else": [
-                                                            {
-                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                                                "namespace": "convo-core",
-                                                                "properties": {
-                                                                    "type": "default",
-                                                                    "text": "Playing the last track.",
-                                                                    "append": false,
-                                                                    "alexa_domain": "normal",
-                                                                    "alexa_emotion": "neutral",
-                                                                    "alexa_emotion_intensity": "medium",
-                                                                    "_component_id": "sfb74h31-80n3-rmfv-f7ou-s69fhazgkhag"
-                                                                }
-                                                            }
-                                                        ],
-                                                        "_component_id": "hbhfiavj-tohu-deej-kkbz-7sfvjobynhfq"
-                                                    }
-                                                },
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "scope_type": "installation",
-                                                        "properties": {
-                                                            "search": "",
-                                                            "search_folder": ""
-                                                        },
-                                                        "_component_id": "oul5wyg1-ervd-gk0d-f4ju-hrnczwxrssmn",
-                                                        "parameters": "service"
-                                                    }
-                                                }
-                                            ],
-                                            "else_if": [
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\ElseIfElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "test": "${last_media_info.last && last_media_info.first}",
-                                                        "then": [
-                                                            {
-                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                                                "namespace": "convo-core",
-                                                                "properties": {
-                                                                    "comment": "Only track - search cleanup in case of an error",
-                                                                    "context": null,
-                                                                    "_component_id": "hlsxshgs-lht2-1eg1-s3u3-zhmwcq4uluvg"
-                                                                }
-                                                            },
-                                                            {
-                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
-                                                                "namespace": "convo-core",
-                                                                "properties": {
-                                                                    "scope_type": "installation",
-                                                                    "properties": {
-                                                                        "search": "",
-                                                                        "search_folder": ""
-                                                                    },
-                                                                    "_component_id": "abtxb1nn-kfoj-0jky-qooj-hcquaungegac",
-                                                                    "parameters": "service"
-                                                                }
-                                                            }
-                                                        ],
-                                                        "_component_id": "mzhcwitx-jmt0-xkuo-4cr8-ctufvihp69w8"
-                                                    }
-                                                }
-                                            ],
-                                            "else": [
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\CommentElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "comment": "Neither the first nor last - continuation  message",
-                                                        "context": null,
-                                                        "_component_id": "avlpizve-skau-6def-eag2-9mwey0gnks4o"
-                                                    }
-                                                },
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\RunOnceElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "scope_type": "installation",
-                                                        "name": "Continuing from where you left off",
-                                                        "child": [
-                                                            {
-                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
-                                                                "namespace": "convo-core",
-                                                                "properties": {
-                                                                    "type": "default",
-                                                                    "text": "Continuing from where you left off.",
-                                                                    "append": false,
-                                                                    "alexa_domain": "normal",
-                                                                    "alexa_emotion": "neutral",
-                                                                    "alexa_emotion_intensity": "medium",
-                                                                    "_component_id": "tu2wzpvm-m4ph-xfli-vz4e-gfsr7um4iets"
-                                                                }
-                                                            }
-                                                        ],
-                                                        "else": [],
-                                                        "_component_id": "wavqlvt9-jvg1-f57v-vaxb-v7fnqwgzbi57"
-                                                    }
-                                                }
-                                            ],
-                                            "_component_id": "rdfdoob1-rxqj-cqv0-dvep-a0fppptypnco"
-                                        }
-                                    }
-                                ],
-                                "_component_id": "idnnecva-ygvd-oe5w-opsj-kbtcwdzmhm4u"
-                            }
-                        },
-                        {
                             "class": "\\Convo\\Pckg\\Core\\Elements\\ReadElementsFragment",
                             "namespace": "convo-core",
                             "properties": {
@@ -4007,6 +3796,19 @@
                                 "media_info_var": "media_info",
                                 "has_results": [
                                     {
+                                        "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
+                                        "namespace": "convo-core",
+                                        "properties": {
+                                            "scope_type": "installation",
+                                            "parameters": "service",
+                                            "properties": {
+                                                "last_ok_search": "${search}",
+                                                "last_ok_search_folders": "${search_folders}"
+                                            },
+                                            "_component_id": "eoalmprn-9sxl-uuny-wf8v-t75jjwwztbdt"
+                                        }
+                                    },
+                                    {
                                         "class": "\\Convo\\Pckg\\Core\\Elements\\IfElement",
                                         "namespace": "convo-core",
                                         "properties": {
@@ -4031,18 +3833,6 @@
                                                             "search_term": "${search}"
                                                         },
                                                         "_component_id": "0fmlcixy-bmag-1t4y-ss0u-nrbeoak91tos"
-                                                    }
-                                                },
-                                                {
-                                                    "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
-                                                    "namespace": "convo-core",
-                                                    "properties": {
-                                                        "scope_type": "installation",
-                                                        "properties": {
-                                                            "search": ""
-                                                        },
-                                                        "_component_id": "qlgxn9h1-tuyz-jit2-yvsq-tif7u0wrkt2b",
-                                                        "parameters": "service"
                                                     }
                                                 },
                                                 {
@@ -4175,12 +3965,24 @@
                                                                 "namespace": "convo-core",
                                                                 "properties": {
                                                                     "scope_type": "installation",
+                                                                    "parameters": "service",
                                                                     "properties": {
-                                                                        "search": "",
-                                                                        "search_folder": ""
+                                                                        "search": "${last_ok_search}",
+                                                                        "search_folders": "${last_ok_search_folders}"
                                                                     },
-                                                                    "_component_id": "hxewhut6-czgr-rwpv-jwj9-zs6lkrcwh5o1",
-                                                                    "parameters": "service"
+                                                                    "_component_id": "ffzfsldf-dyem-9yv4-m5v6-gykmeptnve2y"
+                                                                }
+                                                            },
+                                                            {
+                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
+                                                                "namespace": "convo-core",
+                                                                "properties": {
+                                                                    "scope_type": "request",
+                                                                    "parameters": "service",
+                                                                    "properties": {
+                                                                        "last_played_playlist": "${contexts.search_media.getSongs()}"
+                                                                    },
+                                                                    "_component_id": "y2yhacsx-avtt-aa42-jixa-1wanceklhrb4"
                                                                 }
                                                             },
                                                             {
@@ -4249,12 +4051,24 @@
                                                                 "namespace": "convo-core",
                                                                 "properties": {
                                                                     "scope_type": "installation",
+                                                                    "parameters": "service",
                                                                     "properties": {
-                                                                        "search": "",
-                                                                        "search_folder": ""
+                                                                        "search": "${last_ok_search}",
+                                                                        "search_folders": "${last_ok_search_folders}"
                                                                     },
-                                                                    "_component_id": "v5wrhuum-l3u0-r6r5-n1w9-mybnsl98zrpl",
-                                                                    "parameters": "service"
+                                                                    "_component_id": "v4sxdpzx-tqkn-mzv2-1uwi-wmknk7msjiqc"
+                                                                }
+                                                            },
+                                                            {
+                                                                "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
+                                                                "namespace": "convo-core",
+                                                                "properties": {
+                                                                    "scope_type": "request",
+                                                                    "parameters": "service",
+                                                                    "properties": {
+                                                                        "last_played_playlist": "${contexts.search_media.getSongs()}"
+                                                                    },
+                                                                    "_component_id": "fms3w69v-qbt9-pcrl-tk7e-kxc9jehqmlp1"
                                                                 }
                                                             },
                                                             {
@@ -4350,6 +4164,19 @@
                                     "track_index": "${0}"
                                 },
                                 "_component_id": "mq8dsza3-ennh-eouw-jyzw-yufgftgixr42"
+                            }
+                        },
+                        {
+                            "class": "\\Convo\\Pckg\\Core\\Elements\\SetParamElement",
+                            "namespace": "convo-core",
+                            "properties": {
+                                "scope_type": "installation",
+                                "parameters": "service",
+                                "properties": {
+                                    "search": "${last_ok_search}",
+                                    "search_folders": "${last_ok_search_folders}"
+                                },
+                                "_component_id": "docxdpjs-b2wq-tviz-pfau-o3fo54wajxq8"
                             }
                         },
                         {
