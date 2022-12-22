@@ -2,8 +2,6 @@
 
 namespace Convo\Pckg\Filesystem;
 
-use Convo\Core\Util\StrUtil;
-use DirectoryIterator;
 use Convo\Core\Media\Mp3Id3File;
 use Convo\Core\Workflow\AbstractMediaSourceContext;
 
@@ -23,7 +21,10 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
 
     private $_loadedSongs;
 
-    private $_addedSearchFolders = [];
+    /**
+     * @var Mp3FileDirectory
+     */
+    private $_mp3FileDirectory;
 
     public function __construct( $properties)
     {
@@ -38,6 +39,8 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         
         $this->_backgroundUrl           =   $properties['background_url'];
         $this->_defaultSongImageUrl     =   $properties['default_song_image_url'];
+
+        $this->_mp3FileDirectory = new Mp3FileDirectory($this->_logger);
     }
 
     
@@ -77,9 +80,18 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             $min_match_percentage = self::MIN_MATCH_PERCENT;
         }
 
+        $this->_mp3FileDirectory->setBasePath($base_path);
+        $this->_mp3FileDirectory->setBaseUrl($base_url);
+        $this->_mp3FileDirectory->setMinMatchPercentage($min_match_percentage);
+
         $model          =   $this->_getQueryModel();
-        
-        $args           =   [ 'search' => $search, 'search_folders' => $search_folders];
+
+        $args           =   [
+            'search' => $search,
+            'search_folders' => $search_folders,
+            'orderby' => 'name',
+            'order' => 'ASC'
+        ];
         $args_changed   =   $args != $model['arguments'];
         
         if ( isset( $this->_loadedSongs) && !$args_changed) {
@@ -96,57 +108,24 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
 
         $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']['.$search_folders.'] with min match percentage ['.$min_match_percentage.']');
 
-        $folders_only   =   false;
-        if ( $search_folders && !$search) {
-            $folders_only   =   true;
+        if (!empty($args['search']) || !empty($args['search_folders']) ) {
+            $this->_mp3FileDirectory->filter($args);
+        } else {
+            $this->_mp3FileDirectory->filter();
         }
-        
-        $root   =   new DirectoryIterator( $base_path);
-        
-        // READ ROOT FILES
-        if ( !$folders_only) {
-            $this->_loadedSongs =   array_merge(
-                $this->_loadedSongs,
-                $this->_readFolderSongs( true, $root, $base_url, $artwork, $background, $search, $min_match_percentage));
-        }
+        $this->_mp3FileDirectory->sort($args);
 
-        $bestMatchedFolder = $this->_getBestMatchedFolder($search_folders, $base_path, $min_match_percentage);
-
-        foreach( $root as $root_item)
-        {
-            if ( $root_item->isDot() || $root_item->isFile()) {
-                continue;
-            }
-            
-            if ( $root_item->isDir()) 
-            {
-                if ( !empty($bestMatchedFolder)) {
-                    $accepts_folder =   $this->_acceptsFolder( $root_item->getFilename(), $bestMatchedFolder);
-                    if ( $folders_only && !$accepts_folder) {
-                        continue;
-                    }
-                    if ( $accepts_folder) {
-                        $this->_logger->info( 'Loading full folder dir ['.$root_item->getFilename().']');
-                        $this->_loadedSongs =   array_merge(
-                            $this->_loadedSongs,
-                            $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background));
-                        continue;
-                    }
-                }
-                
-                $this->_logger->debug( 'Scanning folder dir ['.$root_item->getFilename().']');
-                $this->_loadedSongs =   array_merge(
-                    $this->_loadedSongs,
-                    $this->_readFolderSongs( false, $root_item, $base_url, $artwork, $background, $search, $min_match_percentage)
-                );
-            }
+        foreach ($this->_mp3FileDirectory->getItems() as $item) {
+            $this->_loadedSongs[] = new Mp3Id3File( $item['real_path'], $item['file_url'], $artwork, $background);
         }
         
         $count              =   count( $this->_loadedSongs);
-        $count_changed      =   count( $model['playlist']) !== $count; 
-        
+        $count_changed      =   count( $model['playlist']) !== $count;
+
         $this->_logger->info( 'Found total ['.$count.'] songs');
-        
+
+        $this->_logger->debug('Contents of the loaded songs ['.print_r($this->_loadedSongs, true).']');
+
         if ( $count <= 0) {
             $model['playlist']  =   [];
         } else if ( $args_changed || $count_changed) {
@@ -162,126 +141,11 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
                 shuffle( $model['playlist']);
             }
         }
-        
+
+        $this->_logger->debug('Showing the contents of hte query model ['.print_r($model, true).']');
         $this->_saveQueryModel( $model);
         
         return new \ArrayIterator( $this->_loadedSongs);
-    }
-
-    private function _readFolderSongs( $root, DirectoryIterator $folder, $baseUrl, $artwork, $background, $search=null, $minMatchPercentage=self::MIN_MATCH_PERCENT)
-    {
-        if (preg_match('/"([^"]+)"/', $search, $m)) {
-            $this->_logger->warning( 'Quickfix: Corrrecting serach term ['.$search.'] to ['.$m[1].']');
-            $search = $m[1];
-        }
-        
-        $songs  =   [];
-        
-        foreach( new DirectoryIterator( $folder->getRealPath()) as $folder_file)
-        {
-            if ( $folder_file->isDot() || !$folder_file->isFile()) {
-                continue;
-            }
-            
-            if ( strtolower( $folder_file->getExtension()) !== 'mp3') {
-                continue; 
-            }
-            
-            if ( $root) {
-                $file_url   =   $baseUrl.'/'.rawurlencode( $folder_file->getFilename());
-            } else {
-                $file_url   =   $baseUrl.'/'.rawurlencode( $folder->getFilename()).'/'.rawurlencode( $folder_file->getFilename());
-            }
-            
-            $song       =   new Mp3Id3File( $folder_file->getRealPath(), $file_url, $artwork, $background);
-            
-            if ( $search) {
-                if ( $this->_acceptsSong( $song, $search, $minMatchPercentage)) {
-                    $songs[]  =   $song;
-                } else if ( stripos( $folder_file->getBasename(), $search) !== false) {
-                    $songs[] = $song;
-                }
-            } else {
-                $songs[]  =   $song;
-            }
-        }
-        
-        return $songs;
-    }
-    
-    /**
-     * @param Mp3Id3File $song
-     * @param string $search
-     * @return bool
-     */
-    private function _acceptsSong( $song, $search, $minMatchPercentage) {
-
-        if ( empty( $search)) {
-            return true;
-        }
-
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getSongTitle(), $search) >= $minMatchPercentage) {
-            return true;
-        }
-
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getArtist(), $search) >= $minMatchPercentage) {
-            return true;
-        }
-
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getGenre(), $search) >= $minMatchPercentage) {
-            return true;
-        }
-
-        if ( StrUtil::getTextSimilarityPercentageBetweenTwoStrings( $song->getAlbum(), $search) >= $minMatchPercentage) {
-            return true;
-        }
-
-        return false;
-    }
-    
-    private function _acceptsFolder( $folder, $searchFolder) {
-        
-        if ( empty( $searchFolder)) {
-            return true;
-        }
-
-        if ( stripos( $folder, $searchFolder) !== false) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    private function _addSearchFolder($folderName, $search) {
-        $this->_addedSearchFolders[$folderName] = StrUtil::getTextSimilarityPercentageBetweenTwoStrings($folderName, $search);
-    }
-
-    /**
-     * @param $search_folders
-     * @param $base_path
-     * @return string
-     */
-    private function _getBestMatchedFolder( $search_folders, $base_path, $minMatchPercentage): string
-    {
-        $bestMatchedFolder = '';
-
-        if (!empty($search_folders)) {
-            $folderNames = scandir($base_path);
-            if (!empty($folderNames)) {
-                foreach ($folderNames as $folderName) {
-                    $this->_addSearchFolder($folderName, $search_folders);
-                }
-                $value = max($this->_addedSearchFolders);
-                if ($value >= $minMatchPercentage) {
-                    $key = array_search($value, $this->_addedSearchFolders);
-                    if ($key !== false && is_string($key)) {
-                        $bestMatchedFolder = $key;
-                    }
-                }
-            }
-        }
-
-        return $bestMatchedFolder;
     }
 
     // UTIL
