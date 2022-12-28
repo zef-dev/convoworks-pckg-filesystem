@@ -4,6 +4,11 @@
 
 ## [Releases]
 
+## 1.2.0 - 2021-12-28
+
+* Enhanced search through files and folders
+* Updated file player template
+
 ## 1.1.2 - 2021-12-03
 
 * Fix `_decode` property in `JsonReader`
