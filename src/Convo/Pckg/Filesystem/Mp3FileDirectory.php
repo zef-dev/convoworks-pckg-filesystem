@@ -54,19 +54,16 @@ class Mp3FileDirectory
                  * @var $root_item \SplFileInfo
                  */
                 if ($root_item->isDir()) {
+                    $this->_logger->debug( 'Skiping dir ['.$root_item->getFilename().']');
+                    continue;
+                }
+                
+                if ( strtolower( $root_item->getExtension()) !== 'mp3') {
+                    $this->_logger->debug( 'Skiping file ['.$root_item->getFilename().']');
                     continue;
                 }
 
-                $item['file_name'] = str_replace('.'.$root_item->getExtension(), '', $root_item->getFilename());
-                $item['real_path'] = $root_item->getRealPath();
-                $item['time_created'] = filemtime($root_item->getRealPath());
-                $url = $this->_generateFileUrl($root_item->getRealPath());
-                $song = new Mp3Id3File($root_item->getRealPath(), $url);
-                $item['id3_tag_artist'] = $song->getArtist();
-                $item['id3_tag_song_title'] = $song->getSongTitle();
-                $item['file_url'] = $song->getFileUrl();
-                $item['match_score'] = 0;
-                $this->_items[] = $item;
+                $this->_items[] = $this->_readMp3Item( $root_item);
             }
 
             return $this->_items;
@@ -84,19 +81,16 @@ class Mp3FileDirectory
              * @var $root_item \SplFileInfo
              */
             if ($root_item->isDir()) {
+                $this->_logger->debug( 'Skiping dir ['.$root_item->getFilename().']');
                 continue;
             }
-
-            $item['file_name'] = str_replace('.'.$root_item->getExtension(), '', $root_item->getFilename());
-            $item['real_path'] = $root_item->getRealPath();
-            $item['time_created'] = filemtime($root_item->getRealPath());
-            $url = $this->_generateFileUrl($root_item->getRealPath());
-            $song = new Mp3Id3File($root_item->getRealPath(), $url);
-            $item['id3_tag_artist'] = $song->getArtist();
-            $item['id3_tag_song_title'] = $song->getSongTitle();
-            $item['file_url'] = $song->getFileUrl();
-            $item['match_score'] = $this->_calculateMatchScore($root_item->getRealPath(), $song, $args);
-            $items[] = $item;
+            
+            if ( strtolower( $root_item->getExtension()) !== 'mp3') {
+                $this->_logger->debug( 'Skiping file ['.$root_item->getFilename().']');
+                continue;
+            }
+            
+            $items[] = $this->_readMp3Item( $root_item, $args);
         }
 //         $maxMatchScore = max(array_column($items, 'match_score'));
 //         if (empty($maxMatchScore)) {
@@ -110,6 +104,33 @@ class Mp3FileDirectory
         }
 
         return $this->_items;
+    }
+    
+    /**
+     * @param \SplFileInfo $root_item
+     * @param array $args
+     * @return array
+     */
+    private function _readMp3Item( $root_item, $args=null) 
+    {
+        $item                       =   [];
+        $item['file_name']          =   str_replace( '.'.$root_item->getExtension(), '', $root_item->getFilename());
+        $item['real_path']          =   $root_item->getRealPath();
+        $item['time_created']       =   filemtime( $root_item->getRealPath());
+        
+        $song = new Mp3Id3File( $root_item->getRealPath(), $this->_generateFileUrl( $root_item->getRealPath()));
+        
+        $item['id3_tag_artist']     = $song->getArtist();
+        $item['id3_tag_song_title'] = $song->getSongTitle();
+        $item['file_url']           = $song->getFileUrl();
+        
+        if ( $args) {
+            $item['match_score'] = $this->_calculateMatchScore( $root_item->getRealPath(), $song, $args);
+        } else {
+            $item['match_score']        =   0;
+        }
+        
+        return $item;
     }
 
     public function sort($args) {
