@@ -41,41 +41,27 @@ class Mp3FileDirectory
         return $this->_items;
     }
 
-    public function filter($args = []) {
-        $root   =   new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator($this->_basePath));
-        
+    public function filter($args = []) 
+    {
         $this->_logger->debug( 'Searching agains args ['.print_r( $args, true).']');
         
         $this->_items = [];
-        if (!isset($args['search']) && !isset($args['search_folders'])) {
-            $this->_logger->debug( 'Search empty. Reading root files only');
-            foreach( $root as $root_item) {
-                /**
-                 * @var $root_item \SplFileInfo
-                 */
-                if ($root_item->isDir()) {
-                    $this->_logger->debug( 'Skiping dir ['.$root_item->getFilename().']');
-                    continue;
-                }
-                
-                if ( strtolower( $root_item->getExtension()) !== 'mp3') {
-                    $this->_logger->debug( 'Skiping file ['.$root_item->getFilename().']');
-                    continue;
-                }
-
-                $this->_items[] = $this->_readMp3Item( $root_item);
-            }
-
+        if ( !isset($args['search']) && !isset($args['search_folders'])) 
+        {
+            $this->_logger->debug( 'Search empty. Reading all files');
+            $this->_items = $this->_readAllFromFoledr( $this->_basePath);
             return $this->_items;
         }
 
-        if (preg_match('/"([^"]+)"/', $args['search'], $m)) {
+        if ( preg_match('/"([^"]+)"/', $args['search'], $m)) {
             $this->_logger->warning( 'Quickfix: Correcting search term ['.$args['search'].'] to ['.$m[1].']');
             $args['search'] = $m[1];
         }
-        $this->_logger->info('Going to read files in path ['.$this->_basePath.']');
+        
+        $this->_logger->info('Going to scan files in path ['.$this->_basePath.']');
 
-        $items = [];
+        $root   =   new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $this->_basePath));
+        $items  =   [];
         foreach( $root as $root_item) {
             /**
              * @var $root_item \SplFileInfo
@@ -104,6 +90,33 @@ class Mp3FileDirectory
         }
 
         return $this->_items;
+    }
+    
+    private function _readAllFromFoledr( $path)
+    {
+        $root   =   new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator( $path));
+        
+        $this->_logger->debug( 'Reading all files in ['.$path.']');
+        
+        $items  =   [];
+        foreach( $root as $root_item) {
+            /**
+             * @var $root_item \SplFileInfo
+             */
+            if ($root_item->isDir()) {
+                $this->_logger->debug( 'Skiping dir ['.$root_item->getFilename().']');
+                continue;
+            }
+            
+            if ( strtolower( $root_item->getExtension()) !== 'mp3') {
+                $this->_logger->debug( 'Skiping file ['.$root_item->getFilename().']');
+                continue;
+            }
+            
+            $items[] = $this->_readMp3Item( $root_item);
+        }
+        
+        return $items;
     }
     
     /**
