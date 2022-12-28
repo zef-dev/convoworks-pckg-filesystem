@@ -39,8 +39,6 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
         
         $this->_backgroundUrl           =   $properties['background_url'];
         $this->_defaultSongImageUrl     =   $properties['default_song_image_url'];
-
-        $this->_mp3FileDirectory = new Mp3FileDirectory($this->_logger);
     }
 
     
@@ -80,6 +78,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             $min_match_percentage = self::MIN_MATCH_PERCENT;
         }
 
+        $this->_mp3FileDirectory = new Mp3FileDirectory( $this->_logger);
         $this->_mp3FileDirectory->setBasePath($base_path);
         $this->_mp3FileDirectory->setBaseUrl($base_url);
         $this->_mp3FileDirectory->setMinMatchPercentage($min_match_percentage);
