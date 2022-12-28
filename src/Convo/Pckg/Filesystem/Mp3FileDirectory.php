@@ -7,6 +7,9 @@ use Convo\Core\Util\StrUtil;
 
 class Mp3FileDirectory
 {
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
     private $_logger;
     private $_basePath;
     private $_baseUrl;
@@ -40,8 +43,12 @@ class Mp3FileDirectory
 
     public function filter($args = []) {
         $root   =   new \RecursiveIteratorIterator( new \RecursiveDirectoryIterator($this->_basePath));
+        
+        $this->_logger->debug( 'Searching agains args ['.print_r( $args, true).']');
+        
         $this->_items = [];
         if (!isset($args['search']) && !isset($args['search_folders'])) {
+            $this->_logger->debug( 'Search empty. Reading root files only');
             foreach( $root as $root_item) {
                 /**
                  * @var $root_item \SplFileInfo
@@ -91,13 +98,13 @@ class Mp3FileDirectory
             $item['match_score'] = $this->_calculateMatchScore($root_item->getRealPath(), $song, $args);
             $items[] = $item;
         }
-        $maxMatchScore = max(array_column($items, 'match_score'));
-        if (empty($maxMatchScore)) {
-            return $this->_items;
-        }
-        $this->_logger->info('Got max match score ['.$maxMatchScore.']');
+//         $maxMatchScore = max(array_column($items, 'match_score'));
+//         if (empty($maxMatchScore)) {
+//             return $this->_items;
+//         }
+//         $this->_logger->info('Got max match score ['.$maxMatchScore.']');
         foreach ($items as $mp3File) {
-            if ($mp3File['match_score'] === $maxMatchScore) {
+            if ($mp3File['match_score']) {
                 $this->_items[] = $mp3File;
             }
         }
@@ -106,6 +113,7 @@ class Mp3FileDirectory
     }
 
     public function sort($args) {
+        $this->_logger->debug( 'Sorting with args ['.print_r( $args, true).']');
         if (!isset($args['orderby'])) {
             throw new \Exception('The [orderby] parameter must be present.');
         }
@@ -171,8 +179,11 @@ class Mp3FileDirectory
 
             foreach (explode(' ', $realPathPart) as $realPathPartWord) {
                 foreach ($searchTermParts as $searchTermPart) {
-                    if (StrUtil::getTextSimilarityPercentageBetweenTwoStrings(strtolower($searchTermPart), strtolower($realPathPartWord)) >= $this->_minMatchPercentage) {
-                        $matchCount++;
+                    if ( strlen( $searchTermPart) > 3)
+                    {
+                        if (StrUtil::getTextSimilarityPercentageBetweenTwoStrings(strtolower($searchTermPart), strtolower($realPathPartWord)) >= $this->_minMatchPercentage) {
+                            $matchCount++;
+                        }
                     }
                 }
             }
@@ -189,8 +200,11 @@ class Mp3FileDirectory
                     $artistPart = preg_replace('/[^a-zA-Z0-9]+/', ' ', $artistPart);
 
                     foreach ($searchTermParts as $searchTermPart) {
-                        if (StrUtil::getTextSimilarityPercentageBetweenTwoStrings(strtolower($searchTermPart), strtolower($artistPart)) >= $this->_minMatchPercentage) {
-                            $matchScore++;
+                        if ( strlen( $searchTermPart) > 3)
+                        {
+                            if (StrUtil::getTextSimilarityPercentageBetweenTwoStrings(strtolower($searchTermPart), strtolower($artistPart)) >= $this->_minMatchPercentage) {
+                                $matchScore++;
+                            }
                         }
                     }
                 }
@@ -202,8 +216,11 @@ class Mp3FileDirectory
                 $songTitlePart = preg_replace('/[^a-zA-Z0-9]+/', ' ', $songTitlePart);
 
                 foreach ($searchTermParts as $searchTermPart) {
-                    if (StrUtil::getTextSimilarityPercentageBetweenTwoStrings(strtolower($searchTermPart), strtolower($songTitlePart)) >= $this->_minMatchPercentage) {
-                        $matchScore++;
+                    if ( strlen( $searchTermPart) > 3)
+                    {
+                        if (StrUtil::getTextSimilarityPercentageBetweenTwoStrings(strtolower($searchTermPart), strtolower($songTitlePart)) >= $this->_minMatchPercentage) {
+                            $matchScore++;
+                        }
                     }
                 }
             }
