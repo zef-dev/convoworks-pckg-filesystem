@@ -28,7 +28,7 @@
             }
         ],
         "variables": {
-            "SERVICE_NAME": "File Player",
+            "SERVICE_NAME": "File player",
             "BASE_PATH": "",
             "BASE_URL": ""
         },
@@ -3803,7 +3803,7 @@
                                             "parameters": "service",
                                             "properties": {
                                                 "last_ok_search": "${search}",
-                                                "last_ok_search_folders": "${search_folders}"
+                                                "last_ok_search_folders": "${search_folder}"
                                             },
                                             "_component_id": "eoalmprn-9sxl-uuny-wf8v-t75jjwwztbdt"
                                         }
@@ -3968,7 +3968,7 @@
                                                                     "parameters": "service",
                                                                     "properties": {
                                                                         "search": "${last_ok_search}",
-                                                                        "search_folders": "${last_ok_search_folders}"
+                                                                        "search_folder": "${last_ok_search_folders}"
                                                                     },
                                                                     "_component_id": "ffzfsldf-dyem-9yv4-m5v6-gykmeptnve2y"
                                                                 }
@@ -4031,14 +4031,14 @@
                                                     "class": "\\Convo\\Pckg\\Core\\Elements\\ElseIfElement",
                                                     "namespace": "convo-core",
                                                     "properties": {
-                                                        "test": "${search_folders}",
+                                                        "test": "${search_folder}",
                                                         "then": [
                                                             {
                                                                 "class": "\\Convo\\Pckg\\Core\\Elements\\TextResponseElement",
                                                                 "namespace": "convo-core",
                                                                 "properties": {
                                                                     "type": "default",
-                                                                    "text": "Hmm, I couldn't find a playlist folder called ${search_folders}.",
+                                                                    "text": "Hmm, I couldn't find a playlist folder called ${search_folder}.",
                                                                     "append": false,
                                                                     "alexa_domain": "normal",
                                                                     "alexa_emotion": "neutral",
@@ -4054,7 +4054,7 @@
                                                                     "parameters": "service",
                                                                     "properties": {
                                                                         "search": "${last_ok_search}",
-                                                                        "search_folders": "${last_ok_search_folders}"
+                                                                        "search_folder": "${last_ok_search_folders}"
                                                                     },
                                                                     "_component_id": "v4sxdpzx-tqkn-mzv2-1uwi-wmknk7msjiqc"
                                                                 }
@@ -4174,7 +4174,7 @@
                                 "parameters": "service",
                                 "properties": {
                                     "search": "${last_ok_search}",
-                                    "search_folders": "${last_ok_search_folders}"
+                                    "search_folder": "${last_ok_search_folders}"
                                 },
                                 "_component_id": "docxdpjs-b2wq-tviz-pfau-o3fo54wajxq8"
                             }
@@ -5154,7 +5154,8 @@
                                         "properties": {
                                             "scope_type": "installation",
                                             "properties": {
-                                                "search": ""
+                                                "search": "",
+                                                "search_folder": ""
                                             },
                                             "_component_id": "ioe2zzrh-qhne-okri-ou63-jvcq4402loxk",
                                             "parameters": "service"
