@@ -68,11 +68,15 @@ class Mp3DirectoryReader
             }
             
             if ( $this->_filter->matchFile( $root_item)) {
-                $own_items[] = $this->_provider->getMp3Info( $root_item);
+                $own_items[] = [
+                    'filename' => $root_item->getFilename(),
+                    'mp3_info' => $this->_provider->getMp3Info( $root_item)
+                ];
             }
         }
         
-        $items = array_merge( $own_items, $items);
+        $own_items  =   array_column( $this->_sort( $own_items), 'mp3_info');
+        $items      =   array_merge( $own_items, $items);
         
         return $items;
     }
@@ -98,10 +102,14 @@ class Mp3DirectoryReader
                 continue;
             }
             
-            $own_items[] = $this->_provider->getMp3Info( $root_item);
+            $own_items[] = [
+                'filename' => $root_item->getFilename(),
+                'mp3_info' => $this->_provider->getMp3Info( $root_item)
+            ];
         }
         
-        $items = array_merge( $own_items, $items);
+        $own_items  =   array_column( $this->_sort( $own_items), 'mp3_info');
+        $items      =   array_merge( $own_items, $items);
         
         return $items;
     }
@@ -109,7 +117,7 @@ class Mp3DirectoryReader
     private function _sort( $items) 
     {
         usort( $items, function( $first, $second){
-            return strtolower( $first->getFilename()) > strtolower( $second->getFilename());
+            return $first['filename'] > $second['filename'];
         });
         
         return $items;
