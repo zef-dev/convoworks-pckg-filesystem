@@ -20,11 +20,6 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
 
     private $_loadedSongs;
 
-    /**
-     * @var Mp3FileDirectory
-     */
-    private $_mp3FileDirectory;
-
     public function __construct( $properties)
     {
         parent::__construct( $properties);
