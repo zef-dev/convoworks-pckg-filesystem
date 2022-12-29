@@ -78,10 +78,7 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             $min_match_percentage = self::MIN_MATCH_PERCENT;
         }
 
-        $this->_mp3FileDirectory = new Mp3FileDirectory( $this->_logger);
-        $this->_mp3FileDirectory->setBasePath($base_path);
-        $this->_mp3FileDirectory->setBaseUrl($base_url);
-        $this->_mp3FileDirectory->setMinMatchPercentage($min_match_percentage);
+
 
         $model          =   $this->_getQueryModel();
 
@@ -97,26 +94,41 @@ class FilesystemMediaContext extends AbstractMediaSourceContext
             return new \ArrayIterator( $this->_loadedSongs);
         }
         
+        
+        
         if ( $args_changed) {
             $this->_logger->info( 'Arguments changed. Storing them and rewinding results ...');
             $model['arguments']     =   $args;
             $model['post_index']    =   0;
         }
         
+        
         $this->_loadedSongs     =   [];
 
         $this->_logger->info( 'Scanning dir ['.$base_path.'] against ['.$search.']['.$search_folders.'] with min match percentage ['.$min_match_percentage.']');
 
-        if (!empty($args['search']) || !empty($args['search_folders']) ) {
-            $this->_mp3FileDirectory->filter($args);
-        } else {
-            $this->_mp3FileDirectory->filter();
-        }
-        $this->_mp3FileDirectory->sort($args);
+        
+        $provider   =   new Mp3InfoProvider( $this->_logger, $base_url, $artwork, $background);
+        $filter     =   new Mp3Filter( $this->_logger, $provider, $min_match_percentage, $search, $search_folders);
+        $dir_reader =   new Mp3DirectoryReader( $this->_logger, $provider, $filter);
+        
+        $this->_loadedSongs = $dir_reader->readFolder( $base_path);
+        
+//         $this->_mp3FileDirectory = new Mp3FileDirectory( $this->_logger);
+//         $this->_mp3FileDirectory->setBasePath($base_path);
+//         $this->_mp3FileDirectory->setBaseUrl($base_url);
+//         $this->_mp3FileDirectory->setMinMatchPercentage($min_match_percentage);
+        
+//         if (!empty($args['search']) || !empty($args['search_folders']) ) {
+//             $this->_mp3FileDirectory->filter($args);
+//         } else {
+//             $this->_mp3FileDirectory->filter();
+//         }
+//         $this->_mp3FileDirectory->sort($args);
 
-        foreach ($this->_mp3FileDirectory->getItems() as $item) {
-            $this->_loadedSongs[] = new Mp3Id3File( $item['real_path'], $item['file_url'], $artwork, $background);
-        }
+//         foreach ($this->_mp3FileDirectory->getItems() as $item) {
+//             $this->_loadedSongs[] = new Mp3Id3File( $item['real_path'], $item['file_url'], $artwork, $background);
+//         }
         
         $count              =   count( $this->_loadedSongs);
         $count_changed      =   count( $model['playlist']) !== $count;

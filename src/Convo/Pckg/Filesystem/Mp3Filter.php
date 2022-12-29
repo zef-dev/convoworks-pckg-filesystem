@@ -28,6 +28,9 @@ class Mp3Filter
         $this->_minPercentage   =   $minPercentage;
         $this->_searchFile      =   strtolower( $searchFile);
         $this->_searchFolder    =   strtolower( $searchFolder);
+        if ( empty( $this->_searchFolder)) {
+            $this->_searchFolder = $this->_searchFile;
+        }
     }
     
     public function hasSearch()
@@ -41,9 +44,13 @@ class Mp3Filter
      */
     public function matchFolder( $folder)
     {
+        if ( empty( $this->_searchFolder)) {
+            return false;
+        }
+        
         $folder_name    =   strtolower( $folder->getBasename( '.' . $folder->getExtension()));
         $folder_name    =   preg_replace( '/[^a-zA-Z0-9]+/', ' ', $folder_name);
-        
+
         if ( $folder_name === $this->_searchFolder) {
             $this->_logger->debug( 'Exact folder match ['.$folder_name.']');  
             return true;
@@ -88,7 +95,7 @@ class Mp3Filter
             return true;
         }
         
-        if ( strpos( $song->getArtist(), $this->_searchFolder) !== false) {
+        if ( $this->_searchFolder && strpos( $song->getArtist(), $this->_searchFolder) !== false) {
             $this->_logger->debug( 'Strpos song artist against search folder ['.$song->getArtist().']');
             return true;
         }
