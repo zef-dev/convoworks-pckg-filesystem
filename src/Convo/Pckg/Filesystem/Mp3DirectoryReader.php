@@ -44,8 +44,9 @@ class Mp3DirectoryReader
 
     private function _scanFolder( $path)
     {
-        $items  =   [];
-        $root   =   new \DirectoryIterator( $path);
+        $items      =   [];
+        $own_items  =   [];
+        $root       =   new \DirectoryIterator( $path);
         
         foreach( $root as $root_item)
         {
@@ -67,17 +68,20 @@ class Mp3DirectoryReader
             }
             
             if ( $this->_filter->matchFile( $root_item)) {
-                $items[] = $this->_provider->getMp3Info( $root_item);
+                $own_items[] = $this->_provider->getMp3Info( $root_item);
             }
         }
+        
+        $items = array_merge( $own_items, $items);
         
         return $items;
     }
     
     private function _readFolder( $path)
     {
-        $items  =   [];
-        $root   =   new \DirectoryIterator( $path);
+        $items      =   [];
+        $own_items  =   [];
+        $root       =   new \DirectoryIterator( $path);
         
         foreach( $root as $root_item)
         {
@@ -94,8 +98,19 @@ class Mp3DirectoryReader
                 continue;
             }
             
-            $items[] = $this->_provider->getMp3Info( $root_item);
+            $own_items[] = $this->_provider->getMp3Info( $root_item);
         }
+        
+        $items = array_merge( $own_items, $items);
+        
+        return $items;
+    }
+    
+    private function _sort( $items) 
+    {
+        usort( $items, function( $first, $second){
+            return strtolower( $first->getFilename()) > strtolower( $second->getFilename());
+        });
         
         return $items;
     }
