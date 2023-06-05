@@ -4,6 +4,10 @@
 
 ## [Releases]
 
+## 1.2.1 - 2023-06-05
+
+* Remove adding response from file reader
+
 ## 1.2.0 - 2021-12-28
 
 * Enhanced search through files and folders
