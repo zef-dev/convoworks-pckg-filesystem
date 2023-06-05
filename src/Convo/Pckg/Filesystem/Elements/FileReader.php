@@ -36,7 +36,7 @@ class FileReader extends \Convo\Core\Workflow\AbstractWorkflowComponent implemen
             $this->_logger->debug( 'mode is ['.$mode.']');
             $this->_logger->debug( 'var to store ['.$var.']');
 
-            $response->addText( 'Reading folder ['.$basePath.']');
+       //     $response->addText( 'Reading folder ['.$basePath.']');
 
             $items = array();
             $folder = dir($basePath);
