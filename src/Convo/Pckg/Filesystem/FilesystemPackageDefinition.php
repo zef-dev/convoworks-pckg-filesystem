@@ -14,7 +14,7 @@ class FilesystemPackageDefinition extends AbstractPackageDefinition
 	{
 		parent::__construct($logger, self::NAMESPACE, __DIR__);
 
-        $this->addTemplate( $this->_loadFile(__DIR__ . '/file-player.template.json'));
+        $this->registerTemplate( __DIR__ . '/file-player.template.json');
 	}
 
 	protected function _initDefintions()
